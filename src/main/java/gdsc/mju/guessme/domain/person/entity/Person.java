@@ -1,21 +1,25 @@
-package gdsc.mju.guessme.domain.character.entity;
+package gdsc.mju.guessme.domain.person.entity;
 
 import gdsc.mju.guessme.domain.user.entity.User;
 import java.time.LocalDate;
 import java.util.UUID;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import lombok.Getter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 
-public class Character {
+@Getter
+@Entity
+public class Person {
 
     @Id
-    @GeneratedValue(generator = "uuid4")
-    @GenericGenerator(name = "uuid4", strategy = "uuid4")
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
@@ -40,9 +44,9 @@ public class Character {
     @Column
     private Long score;
 
-    @Column
+//    @Column
     @ColumnDefault("false")
-    private Boolean like;
+    private Boolean favorite;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
