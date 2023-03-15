@@ -6,4 +6,9 @@ public class Response<T> {
 
   private T data;
 
+    public Response(int status, String message, T data) {
+        this.status = status;
+        this.message = message;
+        this.data = data;
+    }
 }
