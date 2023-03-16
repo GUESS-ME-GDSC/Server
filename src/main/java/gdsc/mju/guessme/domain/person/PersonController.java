@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import gdsc.mju.guessme.domain.person.dto.PersonResDto;
-import gdsc.mju.guessme.global.response.Response;
+import gdsc.mju.guessme.global.response.BaseResponse;
 
 @RequiredArgsConstructor
 @RequestMapping("/person")
@@ -18,10 +18,10 @@ public class PersonController {
     private final PersonService personService;
 
     @GetMapping("/all")
-    public Response<List<PersonResDto>> getPersonList(
+    public BaseResponse<List<PersonResDto>> getPersonList(
         @RequestParam Boolean favorite
     ) {
-        return new Response<>(
+        return new BaseResponse<>(
             200,
             "Load Success",
             personService.getPersonList(favorite)
