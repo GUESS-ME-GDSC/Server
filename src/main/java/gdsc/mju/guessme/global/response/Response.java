@@ -1,5 +1,8 @@
 package gdsc.mju.guessme.global.response;
 
+import lombok.Getter;
+
+@Getter
 public class Response<T> {
   private int status;
   private String message;
