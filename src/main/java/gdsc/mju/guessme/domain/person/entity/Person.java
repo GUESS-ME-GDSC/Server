@@ -10,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.Getter;
-import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Entity
@@ -39,10 +38,10 @@ public class Person {
     @Column
     private String voice;
 
-    @Column
+    @Column(columnDefinition = "bigint default 0")
     private Long score;
 
-    @ColumnDefault("false")
+    @Column(columnDefinition = "boolean default false")
     private Boolean favorite;
 
     @ManyToOne(optional = false)
