@@ -1,5 +1,6 @@
 package gdsc.mju.guessme.domain.person;
 
+import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,7 @@ public class PersonController {
     @GetMapping("/all")
     public BaseResponse<List<PersonResDto>> getPersonList(
         @RequestParam Boolean favorite
-    ) {
+    ) throws BaseException {
         return new BaseResponse<>(
             200,
             "Load Success",
