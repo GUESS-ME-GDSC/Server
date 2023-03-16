@@ -35,7 +35,7 @@ public class Info {
     @Column(nullable = false)
     private String infoValue;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "person_id")
     private Person person;
 }

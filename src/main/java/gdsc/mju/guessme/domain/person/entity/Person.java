@@ -43,12 +43,11 @@ public class Person {
 
     @Column
     private Long score;
-
-//    @Column
+    
     @ColumnDefault("false")
     private Boolean favorite;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
 }
