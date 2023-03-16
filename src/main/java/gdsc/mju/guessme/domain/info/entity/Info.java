@@ -1,28 +1,32 @@
 package gdsc.mju.guessme.domain.info.entity;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.Getter;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import gdsc.mju.guessme.domain.person.entity.Person;
 
 @Getter
+@Setter
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 public class Info {
+
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(columnDefinition = "BINARY(16)")
-    private UUID id;
+    @Column(name = "id")
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private Long id;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreatedDate
@@ -35,7 +39,7 @@ public class Info {
     @Column(nullable = false)
     private String infoValue;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "person_id")
     private Person person;
 }
