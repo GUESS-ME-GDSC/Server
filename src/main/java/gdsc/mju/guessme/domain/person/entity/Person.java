@@ -9,9 +9,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @Entity
 public class Person {
 
@@ -47,4 +51,15 @@ public class Person {
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Builder
+    public Person(String name, String relation, LocalDate birth, String residence, String image, String voice, User user) {
+        this.name = name;
+        this.relation = relation;
+        this.birth = birth;
+        this.residence = residence;
+        this.image = image;
+        this.voice = voice;
+        this.user = user;
+    }
 }
