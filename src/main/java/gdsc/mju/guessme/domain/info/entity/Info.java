@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -42,4 +43,11 @@ public class Info {
     @ManyToOne(optional = false)
     @JoinColumn(name = "person_id")
     private Person person;
+
+    @Builder
+    public Info(String infoKey, String infoValue, Person person) {
+        this.infoKey = infoKey;
+        this.infoValue = infoValue;
+        this.person = person;
+    }
 }

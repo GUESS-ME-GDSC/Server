@@ -1,13 +1,17 @@
 package gdsc.mju.guessme.domain.person.dto;
 
+import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class CreatePersonReqDto {
+
     private String image;
     private String voice;
     private String name;
@@ -25,15 +29,5 @@ public class CreatePersonReqDto {
         this.birth = birth;
         this.residence = residence;
         this.info = info;
-    }
-}
-
-class InfoObj {
-    private String infoKey;
-    private String infoValue;
-
-    public InfoObj(String infoKey, String infoValue) {
-        this.infoKey = infoKey;
-        this.infoValue = infoValue;
     }
 }

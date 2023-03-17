@@ -1,9 +1,15 @@
 package gdsc.mju.guessme.domain.person;
 
+import gdsc.mju.guessme.domain.info.entity.Info;
+import gdsc.mju.guessme.domain.info.repository.InfoRepository;
 import gdsc.mju.guessme.domain.person.dto.CreatePersonReqDto;
+import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import gdsc.mju.guessme.domain.person.dto.PersonResDto;
 import gdsc.mju.guessme.domain.person.repository.PersonRepository;
 import gdsc.mju.guessme.domain.person.entity.Person;
+import gdsc.mju.guessme.domain.user.entity.User;
+import gdsc.mju.guessme.domain.user.repository.UserRepository;
+import gdsc.mju.guessme.global.response.BaseException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +19,8 @@ import org.springframework.stereotype.Service;
 public class PersonService {
 
     private final PersonRepository personRepository;
+    private final InfoRepository infoRepository;
+    private final UserRepository userRepository;
 
     public List<PersonResDto> getPersonList(
         Boolean favorite
@@ -24,21 +32,38 @@ public class PersonService {
         }
     }
 
-    public void createPerson(CreatePersonReqDto createPersonReqDto) {
+    public void createPerson(CreatePersonReqDto createPersonReqDto) throws BaseException {
+        // TODO: use test user now but need to use user from token
+         User user = userRepository.findByUserId("test");
+         if(user == null) {
+             throw new BaseException(404, "User not found");
+         }
+        System.out.println("user = " + user.getUserId());
+
         // TODO: image upload to gcs
 
         // TODO: voice upload to gcs
 
-        // TODO: info save to db
+        System.out.println("createPersonReqDto. = " + createPersonReqDto.toString());
 
-
-        personRepository.save(Person.builder()
+        Person person = personRepository.save(Person.builder()
             .image(createPersonReqDto.getImage())
             .voice(createPersonReqDto.getVoice())
             .name(createPersonReqDto.getName())
             .relation(createPersonReqDto.getRelation())
             .birth(createPersonReqDto.getBirth())
             .residence(createPersonReqDto.getResidence())
+            .user(user)
             .build());
+
+        // Info 저장
+        List<InfoObj> infoObjList = createPersonReqDto.getInfo();
+        for (InfoObj infoObj : infoObjList) {
+            infoRepository.save(Info.builder()
+                .infoKey(infoObj.getInfoKey())
+                .infoValue(infoObj.getInfoValue())
+                .person(person)
+                .build());
+        }
     }
 }
