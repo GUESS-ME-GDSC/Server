@@ -121,4 +121,8 @@ public class PersonService {
         infoRepository.deleteAllInBatchByPersonId(personId);
         personRepository.deleteById(personId);
     }
+
+    public void toggleFavorite(Long personId) {
+        personRepository.toggleFavorite(personId);
+    }
 }

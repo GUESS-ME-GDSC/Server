@@ -84,4 +84,16 @@ public class PersonController {
             null
         );
     }
+
+    @PatchMapping("/{id}/favorite")
+    public BaseResponse<Void> toggleFavorite(
+        @PathVariable("id") Long personId
+    ) throws BaseException {
+        personService.toggleFavorite(personId);
+        return new BaseResponse<>(
+            201,
+            "Update Successfully",
+            null
+        );
+    }
 }
