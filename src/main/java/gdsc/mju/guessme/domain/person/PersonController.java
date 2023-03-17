@@ -5,6 +5,7 @@ import gdsc.mju.guessme.domain.person.dto.PersonDetailResDto;
 import gdsc.mju.guessme.domain.person.dto.UpdatePersonReqDto;
 import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,6 +69,18 @@ public class PersonController {
         return new BaseResponse<>(
             201,
             "Update Successfully",
+            null
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public BaseResponse<Void> deletePerson(
+        @PathVariable("id") Long personId
+    ) throws BaseException {
+        personService.deletePerson(personId);
+        return new BaseResponse<>(
+            200,
+            "Delete Successfully",
             null
         );
     }

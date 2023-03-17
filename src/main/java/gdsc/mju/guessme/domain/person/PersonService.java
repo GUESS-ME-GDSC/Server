@@ -119,4 +119,9 @@ public class PersonService {
                 .build());
         }
     }
+
+    public void deletePerson(Long personId) {
+        infoRepository.deleteAllInBatchByPersonId(personId);
+        personRepository.deleteById(personId);
+    }
 }
