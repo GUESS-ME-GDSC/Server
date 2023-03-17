@@ -38,14 +38,12 @@ public class PersonService {
          if(user == null) {
              throw new BaseException(404, "User not found");
          }
-        System.out.println("user = " + user.getUserId());
 
         // TODO: image upload to gcs
 
         // TODO: voice upload to gcs
 
-        System.out.println("createPersonReqDto. = " + createPersonReqDto.toString());
-
+        // Person 저장
         Person person = personRepository.save(Person.builder()
             .image(createPersonReqDto.getImage())
             .voice(createPersonReqDto.getVoice())
@@ -54,6 +52,7 @@ public class PersonService {
             .birth(createPersonReqDto.getBirth())
             .residence(createPersonReqDto.getResidence())
             .user(user)
+            .score(12L)
             .build());
 
         // Info 저장
