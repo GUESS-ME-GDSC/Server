@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -21,6 +22,7 @@ import gdsc.mju.guessme.domain.person.entity.Person;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 @Entity
 public class Info {
 
