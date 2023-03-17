@@ -115,16 +115,6 @@ public class PersonService {
         if (updatedInfoObjList.size() > 0) {
             throw new BaseException(400, "Invalid info key");
         }
-
-        // 기능 명세서 상 정보를 추가하는 기능은 없으므로 아래 코드는 주석처리
-//        // updatedInfoObjList에 남은 InfoObj는 새로운 Info를 생성
-//        for (InfoObj infoObj : updatedInfoObjList) {
-//            infoRepository.save(Info.builder()
-//                .infoKey(infoObj.getInfoKey())
-//                .infoValue(infoObj.getInfoValue())
-//                .person(person)
-//                .build());
-//        }
     }
 
     public void deletePerson(Long personId) {
