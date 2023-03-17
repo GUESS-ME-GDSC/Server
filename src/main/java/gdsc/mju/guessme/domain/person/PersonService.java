@@ -52,7 +52,6 @@ public class PersonService {
             .birth(createPersonReqDto.getBirth())
             .residence(createPersonReqDto.getResidence())
             .user(user)
-            .score(12L)
             .build());
 
         // Info 저장
