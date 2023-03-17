@@ -4,6 +4,7 @@ import gdsc.mju.guessme.domain.info.entity.Info;
 import gdsc.mju.guessme.domain.info.repository.InfoRepository;
 import gdsc.mju.guessme.domain.person.dto.CreatePersonReqDto;
 import gdsc.mju.guessme.domain.info.dto.InfoObj;
+import gdsc.mju.guessme.domain.person.dto.PersonDetailResDto;
 import gdsc.mju.guessme.domain.person.dto.PersonResDto;
 import gdsc.mju.guessme.domain.person.repository.PersonRepository;
 import gdsc.mju.guessme.domain.person.entity.Person;
@@ -63,5 +64,15 @@ public class PersonService {
                 .person(person)
                 .build());
         }
+    }
+
+    public PersonDetailResDto getPerson(Long personId) throws BaseException {
+        Person person = personRepository.findById(personId)
+            .orElseThrow(
+                () -> new BaseException(404, "Person not found with that Id")
+            );
+
+        List<InfoObj> infoObjList = InfoObj.of(infoRepository.findAllByPerson(person));
+        return PersonDetailResDto.of(person, infoObjList);
     }
 }

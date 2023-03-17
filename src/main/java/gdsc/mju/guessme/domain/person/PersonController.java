@@ -1,10 +1,11 @@
 package gdsc.mju.guessme.domain.person;
 
 import gdsc.mju.guessme.domain.person.dto.CreatePersonReqDto;
+import gdsc.mju.guessme.domain.person.dto.PersonDetailResDto;
 import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +43,17 @@ public class PersonController {
             201,
             "Create Successfully",
             null
+        );
+    }
+
+    @GetMapping("/{id}")
+    public BaseResponse<PersonDetailResDto> getPerson(
+        @PathVariable("id") Long personId
+    ) throws BaseException {
+        return new BaseResponse<>(
+            200,
+            "Load Successfully",
+            personService.getPerson(personId)
         );
     }
 }
