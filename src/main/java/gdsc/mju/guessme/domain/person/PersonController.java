@@ -3,6 +3,7 @@ package gdsc.mju.guessme.domain.person;
 import gdsc.mju.guessme.domain.person.dto.CreatePersonReqDto;
 import gdsc.mju.guessme.domain.person.dto.PersonDetailResDto;
 import gdsc.mju.guessme.domain.person.dto.UpdatePersonReqDto;
+import gdsc.mju.guessme.domain.person.dto.AddInfoReqDto;
 import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -93,6 +94,19 @@ public class PersonController {
         return new BaseResponse<>(
             201,
             "Update Successfully",
+            null
+        );
+    }
+
+    @PostMapping("/{id}/newinfo")
+    public BaseResponse<Void> addNewInfo(
+        @PathVariable("id") Long personId,
+        @RequestBody AddInfoReqDto addInfoReqDto
+    ) throws BaseException {
+        personService.addNewInfo(personId, addInfoReqDto);
+        return new BaseResponse<>(
+            201,
+            "Create Successfully",
             null
         );
     }

@@ -2,6 +2,7 @@ package gdsc.mju.guessme.domain.person;
 
 import gdsc.mju.guessme.domain.info.entity.Info;
 import gdsc.mju.guessme.domain.info.repository.InfoRepository;
+import gdsc.mju.guessme.domain.person.dto.AddInfoReqDto;
 import gdsc.mju.guessme.domain.person.dto.CreatePersonReqDto;
 import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import gdsc.mju.guessme.domain.person.dto.PersonDetailResDto;
@@ -124,5 +125,21 @@ public class PersonService {
 
     public void toggleFavorite(Long personId) {
         personRepository.toggleFavorite(personId);
+    }
+
+    public void addNewInfo(Long personId, AddInfoReqDto addInfoReqDto) throws BaseException {
+        Person person = personRepository.findById(personId)
+            .orElseThrow(
+                () -> new BaseException(404, "Person not found with that Id")
+            );
+
+        List<InfoObj> newInfoObjList = addInfoReqDto.getInfo();
+        for (InfoObj infoObj : newInfoObjList) {
+            infoRepository.save(Info.builder()
+                .infoKey(infoObj.getInfoKey())
+                .infoValue(infoObj.getInfoValue())
+                .person(person)
+                .build());
+        }
     }
 }
