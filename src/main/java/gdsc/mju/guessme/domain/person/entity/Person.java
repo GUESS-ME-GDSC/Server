@@ -1,5 +1,6 @@
 package gdsc.mju.guessme.domain.person.entity;
 
+import gdsc.mju.guessme.domain.person.dto.UpdatePersonReqDto;
 import gdsc.mju.guessme.domain.user.entity.User;
 import java.time.LocalDate;
 import javax.persistence.Column;
@@ -65,5 +66,14 @@ public class Person {
         this.score = score;
         this.favorite = favorite;
         this.user = user;
+    }
+
+    public void update(UpdatePersonReqDto updatePersonReqDto) {
+        this.name = updatePersonReqDto.getName();
+        this.relation = updatePersonReqDto.getRelation();
+        this.birth = updatePersonReqDto.getBirth();
+        this.residence = updatePersonReqDto.getResidence();
+        this.image = updatePersonReqDto.getImage();
+        this.voice = updatePersonReqDto.getVoice();
     }
 }
