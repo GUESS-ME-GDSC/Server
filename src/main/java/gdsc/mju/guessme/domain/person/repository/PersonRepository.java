@@ -17,6 +17,11 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     List<Person> findByUser(User user);
 
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query("update Person p set p.score=:score where p.id=:personId")
+    void updateScore(Long personId, Long score);
+
     @Modifying
     @Transactional
     @Query("update Person e set e.favorite = case when e.favorite = true then false else true end where e.id = ?1")

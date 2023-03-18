@@ -5,6 +5,7 @@ import gdsc.mju.guessme.domain.info.repository.InfoRepository;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import gdsc.mju.guessme.domain.person.repository.PersonRepository;
 import gdsc.mju.guessme.domain.quiz.dto.CreateQuizResDto;
+import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
 import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +48,14 @@ public class QuizService {
                 .person(person)
                 .info(infoObjList)
                 .build();
+    }
+
+    // 새 점수 등록
+    public Long newscore(NewScoreDto newScoreDto) {
+        Person person = personRepository.findById(newScoreDto.getPersonId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인물입니다."));
+
+        personRepository.updateScore(newScoreDto.getPersonId(), newScoreDto.getScore());
+        return newScoreDto.getScore();
     }
 }

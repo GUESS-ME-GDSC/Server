@@ -1,6 +1,7 @@
 package gdsc.mju.guessme.domain.quiz;
 
 import gdsc.mju.guessme.domain.quiz.dto.CreateQuizResDto;
+import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
 import gdsc.mju.guessme.global.response.BaseException;
 import gdsc.mju.guessme.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,16 @@ public class QuizController {
                 200,
                 "Load Successfully",
                 quizService.createQuiz(personId)
+        );
+    }
+
+    // 새 점수 등록
+    @PatchMapping("/newscore")
+    public BaseResponse<Long> newscore(@RequestBody NewScoreDto newScoreDto) throws BaseException {
+        return new BaseResponse<>(
+                200,
+                "Load Successfully",
+                quizService.newscore(newScoreDto)
         );
     }
 }
