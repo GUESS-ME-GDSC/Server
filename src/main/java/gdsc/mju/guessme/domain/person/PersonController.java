@@ -1,8 +1,12 @@
 package gdsc.mju.guessme.domain.person;
 
+import gdsc.mju.guessme.domain.person.dto.CreatePersonReqDto;
 import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,8 +28,20 @@ public class PersonController {
     ) throws BaseException {
         return new BaseResponse<>(
             200,
-            "Load Success",
+            "Load Successfully",
             personService.getPersonList(favorite)
+        );
+    }
+
+    @PostMapping
+    public BaseResponse<Void> createPerson(
+        @RequestBody CreatePersonReqDto createPersonReqDto
+    ) throws BaseException {
+        personService.createPerson(createPersonReqDto);
+        return new BaseResponse<>(
+            201,
+            "Create Successfully",
+            null
         );
     }
 }

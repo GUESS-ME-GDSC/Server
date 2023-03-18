@@ -9,7 +9,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -20,6 +22,7 @@ import gdsc.mju.guessme.domain.person.entity.Person;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 @Entity
 public class Info {
 
@@ -42,4 +45,11 @@ public class Info {
     @ManyToOne(optional = false)
     @JoinColumn(name = "person_id")
     private Person person;
+
+    @Builder
+    public Info(String infoKey, String infoValue, Person person) {
+        this.infoKey = infoKey;
+        this.infoValue = infoValue;
+        this.person = person;
+    }
 }

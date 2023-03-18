@@ -1,7 +1,14 @@
 package gdsc.mju.guessme.domain.person;
 
+import gdsc.mju.guessme.domain.info.entity.Info;
+import gdsc.mju.guessme.domain.info.repository.InfoRepository;
+import gdsc.mju.guessme.domain.person.dto.CreatePersonReqDto;
+import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import gdsc.mju.guessme.domain.person.dto.PersonResDto;
 import gdsc.mju.guessme.domain.person.repository.PersonRepository;
+import gdsc.mju.guessme.domain.person.entity.Person;
+import gdsc.mju.guessme.domain.user.entity.User;
+import gdsc.mju.guessme.domain.user.repository.UserRepository;
 import gdsc.mju.guessme.global.response.BaseException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,17 +19,50 @@ import org.springframework.stereotype.Service;
 public class PersonService {
 
     private final PersonRepository personRepository;
+    private final InfoRepository infoRepository;
+    private final UserRepository userRepository;
 
     public List<PersonResDto> getPersonList(
         Boolean favorite
-    ) throws BaseException {
-        // sample conflict exception
-        throw new BaseException(409, "Conflict");
-//        if (favorite) {
-//            return PersonResDto.of(personRepository.findByFavoriteTrue());
-//        } else {
-//            return PersonResDto.of(personRepository.findByFavoriteFalse());
-//        }
+    ) {
+        if (favorite) {
+            return PersonResDto.of(personRepository.findByFavoriteTrue());
+        } else {
+            return PersonResDto.of(personRepository.findByFavoriteFalse());
+        }
     }
 
+    public void createPerson(CreatePersonReqDto createPersonReqDto) throws BaseException {
+        // TODO: use test user now but need to use user from token
+         User user = userRepository.findByUserId("test");
+         if(user == null) {
+             throw new BaseException(404, "User not found");
+         }
+
+        // TODO: image upload to gcs
+
+        // TODO: voice upload to gcs
+
+        // Person 저장
+        Person person = personRepository.save(Person.builder()
+            .image(createPersonReqDto.getImage())
+            .voice(createPersonReqDto.getVoice())
+            .name(createPersonReqDto.getName())
+            .relation(createPersonReqDto.getRelation())
+            .birth(createPersonReqDto.getBirth())
+            .residence(createPersonReqDto.getResidence())
+            .user(user)
+            .score(12L)
+            .build());
+
+        // Info 저장
+        List<InfoObj> infoObjList = createPersonReqDto.getInfo();
+        for (InfoObj infoObj : infoObjList) {
+            infoRepository.save(Info.builder()
+                .infoKey(infoObj.getInfoKey())
+                .infoValue(infoObj.getInfoValue())
+                .person(person)
+                .build());
+        }
+    }
 }
