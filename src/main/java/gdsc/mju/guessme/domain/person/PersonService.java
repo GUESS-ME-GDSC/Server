@@ -47,7 +47,7 @@ public class PersonService {
         // TODO: voice upload to gcs
 
         // Person 저장
-        Person person = personRepository.save(Person.builder()
+        personRepository.save(Person.builder()
             .image(createPersonReqDto.getImage())
             .voice(createPersonReqDto.getVoice())
             .name(createPersonReqDto.getName())
@@ -56,16 +56,6 @@ public class PersonService {
             .residence(createPersonReqDto.getResidence())
             .user(user)
             .build());
-
-        // Info 저장
-        List<InfoObj> infoObjList = createPersonReqDto.getInfo();
-        for (InfoObj infoObj : infoObjList) {
-            infoRepository.save(Info.builder()
-                .infoKey(infoObj.getInfoKey())
-                .infoValue(infoObj.getInfoValue())
-                .person(person)
-                .build());
-        }
     }
 
     public PersonDetailResDto getPerson(Long personId) throws BaseException {
