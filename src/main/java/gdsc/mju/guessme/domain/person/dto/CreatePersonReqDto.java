@@ -18,16 +18,14 @@ public class CreatePersonReqDto {
     private String relation;
     private LocalDate birth;
     private String residence;
-    private List<InfoObj> info;
 
     @Builder
-    public CreatePersonReqDto(String image, String voice, String name, String relation, LocalDate birth, String residence, List<InfoObj> info) {
+    public CreatePersonReqDto(String image, String voice, String name, String relation, LocalDate birth, String residence) {
         this.image = image;
         this.voice = voice;
         this.name = name;
         this.relation = relation;
         this.birth = birth;
         this.residence = residence;
-        this.info = info;
     }
 }
