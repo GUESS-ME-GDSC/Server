@@ -40,8 +40,8 @@ public class QuizController {
 
     // 문제 채점
 
-    // 클라이언트에서 인물id, 문제 정답(인포 키), 이미지 주소를 넘겨주면 서버에서 맞는지 여부만 알려줌.
-    // 클라이언트는 이미 인물 사진, 인물 이름, 문제 정답 가지고 있으므로 서버는 정답 여부만 리턴해주면 됨.
+    // 클라이언트에서 문제 정답(인포 키), 이미지 주소를 넘겨주면 서버에서 맞는지 여부만 알려줌.
+    // 클라이언트는 이미 인물 사진, 인물 이름, 문제 정답 가지고 있으므로 서버는 정답 여부만 Boolean으로 리턴해주면 됨.
     @PostMapping(value = "/scoring")
     // @requestbody 사용 시 formdata 오류. multidataForm 으로 넣으려면 어노테이션 빼야 함.
     public BaseResponse<Boolean> scoring(@RequestBody ScoreReqDto dto) throws IOException {
