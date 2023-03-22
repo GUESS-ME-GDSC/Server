@@ -68,12 +68,25 @@ public class Person {
         this.user = user;
     }
 
+//    public void update(UpdatePersonReqDto updatePersonReqDto) {
+//        this.name = updatePersonReqDto.getName() != null ? updatePersonReqDto.getName() : this.name;
+//        this.relation = updatePersonReqDto.getRelation() != null ? updatePersonReqDto.getRelation() : this.relation;
+//        this.birth = updatePersonReqDto.getBirth() != null ? updatePersonReqDto.getBirth() : this.birth;
+//        this.residence = updatePersonReqDto.getResidence() != null ? updatePersonReqDto.getResidence() : this.residence;
+//        this.image = updatePersonReqDto.getImage() != null ? updatePersonReqDto.getImage() : this.image;
+//        this.voice = updatePersonReqDto.getVoice() != null ? updatePersonReqDto.getVoice() : this.voice;
+//    }
+
     public void update(UpdatePersonReqDto updatePersonReqDto) {
-        this.name = updatePersonReqDto.getName();
-        this.relation = updatePersonReqDto.getRelation();
-        this.birth = updatePersonReqDto.getBirth();
-        this.residence = updatePersonReqDto.getResidence();
-        this.image = updatePersonReqDto.getImage();
-        this.voice = updatePersonReqDto.getVoice();
+        this.name = updateIfNotNull(this.name, updatePersonReqDto.getName());
+        this.relation = updateIfNotNull(this.relation, updatePersonReqDto.getRelation());
+        this.birth = updateIfNotNull(this.birth, updatePersonReqDto.getBirth());
+        this.residence = updateIfNotNull(this.residence, updatePersonReqDto.getResidence());
+        this.image = updateIfNotNull(this.image, updatePersonReqDto.getImage());
+        this.voice = updateIfNotNull(this.voice, updatePersonReqDto.getVoice());
+    }
+
+    private <T> T updateIfNotNull(T property, T value) {
+        return value != null ? value : property;
     }
 }
