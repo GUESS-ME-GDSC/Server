@@ -12,9 +12,10 @@ import gdsc.mju.guessme.domain.person.repository.PersonRepository;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
+import gdsc.mju.guessme.global.infra.gcs.GcsService;
 import gdsc.mju.guessme.global.response.BaseException;
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class PersonService {
     private final PersonRepository personRepository;
     private final InfoRepository infoRepository;
     private final UserRepository userRepository;
+    private final GcsService gcsService;
 
     public List<PersonResDto> getPersonList(
         Boolean favorite
@@ -36,7 +38,8 @@ public class PersonService {
         }
     }
 
-    public void createPerson(CreatePersonReqDto createPersonReqDto) throws BaseException {
+    public void createPerson(CreatePersonReqDto createPersonReqDto)
+        throws BaseException, IOException {
         // TODO: use test user now but need to use user from token
         User user = userRepository.findByUserId("test");
         if (user == null) {
@@ -44,15 +47,17 @@ public class PersonService {
         }
 
         // TODO: image upload to gcs
+        String imageUrl = gcsService.uploadFile(createPersonReqDto.getImage());
 
         // TODO: voice upload to gcs
+        String voiceUrl = gcsService.uploadFile(createPersonReqDto.getVoice());
 
         // Person 저장
-        String image = createPersonReqDto.getImage();
-        String voice = createPersonReqDto.getVoice();
+//        String image = createPersonReqDto.getImage().toString();
+//        String voice = createPersonReqDto.getVoice().toString();
         personRepository.save(Person.builder()
-            .image(image)
-            .voice(voice)
+            .image(imageUrl)
+            .voice(voiceUrl)
             .name(createPersonReqDto.getName())
             .relation(createPersonReqDto.getRelation())
             .birth(createPersonReqDto.getBirth())

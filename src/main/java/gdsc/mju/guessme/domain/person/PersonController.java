@@ -5,9 +5,11 @@ import gdsc.mju.guessme.domain.person.dto.PersonDetailResDto;
 import gdsc.mju.guessme.domain.person.dto.UpdatePersonReqDto;
 import gdsc.mju.guessme.domain.person.dto.AddInfoReqDto;
 import gdsc.mju.guessme.global.response.BaseException;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,8 +42,8 @@ public class PersonController {
 
     @PostMapping
     public BaseResponse<Void> createPerson(
-        @RequestBody CreatePersonReqDto createPersonReqDto
-    ) throws BaseException {
+        @ModelAttribute CreatePersonReqDto createPersonReqDto
+    ) throws BaseException, IOException {
         System.out.println(createPersonReqDto.toString());
         personService.createPerson(createPersonReqDto);
         return new BaseResponse<>(
