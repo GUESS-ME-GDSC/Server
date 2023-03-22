@@ -42,6 +42,7 @@ public class PersonController {
     public BaseResponse<Void> createPerson(
         @RequestBody CreatePersonReqDto createPersonReqDto
     ) throws BaseException {
+        System.out.println(createPersonReqDto.toString());
         personService.createPerson(createPersonReqDto);
         return new BaseResponse<>(
             201,

@@ -14,6 +14,7 @@ import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
 import gdsc.mju.guessme.global.response.BaseException;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,19 +38,21 @@ public class PersonService {
 
     public void createPerson(CreatePersonReqDto createPersonReqDto) throws BaseException {
         // TODO: use test user now but need to use user from token
-         User user = userRepository.findByUserId("test");
-         if(user == null) {
-             throw new BaseException(404, "User not found");
-         }
+        User user = userRepository.findByUserId("test");
+        if (user == null) {
+            throw new BaseException(404, "User not found");
+        }
 
         // TODO: image upload to gcs
 
         // TODO: voice upload to gcs
 
         // Person 저장
+        Optional<String> image = createPersonReqDto.getImage();
+        Optional<String> voice = createPersonReqDto.getVoice();
         personRepository.save(Person.builder()
-            .image(createPersonReqDto.getImage())
-            .voice(createPersonReqDto.getVoice())
+            .image(image.orElse(null))
+            .voice(voice.orElse(null))
             .name(createPersonReqDto.getName())
             .relation(createPersonReqDto.getRelation())
             .birth(createPersonReqDto.getBirth())
