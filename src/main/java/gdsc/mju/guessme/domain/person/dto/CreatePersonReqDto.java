@@ -4,6 +4,7 @@ import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -11,6 +12,7 @@ import lombok.ToString;
 @Getter
 @ToString
 public class CreatePersonReqDto {
+
 
     private String image;
     private String voice;

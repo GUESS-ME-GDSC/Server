@@ -7,6 +7,9 @@
 .prod.env
 .test.env
 
+# credential file
+*.json
+
 # Querydsl
 /src/main/generated
 
