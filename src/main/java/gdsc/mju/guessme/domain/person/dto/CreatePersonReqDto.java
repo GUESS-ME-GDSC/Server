@@ -14,15 +14,15 @@ import lombok.ToString;
 public class CreatePersonReqDto {
 
 
-    private Optional<String> image;
-    private Optional<String> voice;
+    private String image;
+    private String voice;
     private String name;
     private String relation;
     private LocalDate birth;
     private String residence;
 
     @Builder
-    public CreatePersonReqDto(Optional<String> image, Optional<String> voice, String name, String relation, LocalDate birth, String residence) {
+    public CreatePersonReqDto(String image, String voice, String name, String relation, LocalDate birth, String residence) {
         this.image = image;
         this.voice = voice;
         this.name = name;

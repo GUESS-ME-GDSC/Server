@@ -48,11 +48,11 @@ public class PersonService {
         // TODO: voice upload to gcs
 
         // Person 저장
-        Optional<String> image = createPersonReqDto.getImage();
-        Optional<String> voice = createPersonReqDto.getVoice();
+        String image = createPersonReqDto.getImage();
+        String voice = createPersonReqDto.getVoice();
         personRepository.save(Person.builder()
-            .image(image.orElse(null))
-            .voice(voice.orElse(null))
+            .image(image)
+            .voice(voice)
             .name(createPersonReqDto.getName())
             .relation(createPersonReqDto.getRelation())
             .birth(createPersonReqDto.getBirth())
