@@ -39,7 +39,7 @@ public class Person {
     @Column(nullable = false)
     private String residence;
 
-    @Column(nullable = false)
+    @Column
     private String image;
 
     @Column
