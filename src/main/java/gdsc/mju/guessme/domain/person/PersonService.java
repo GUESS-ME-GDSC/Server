@@ -38,7 +38,8 @@ public class PersonService {
 
     public void createPerson(CreatePersonReqDto createPersonReqDto) throws BaseException {
         // TODO: use test user now but need to use user from token
-        User user = userRepository.findByUserId("test");
+        User user = userRepository.findByUserId("test")
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
         if (user == null) {
             throw new BaseException(404, "User not found");
         }
