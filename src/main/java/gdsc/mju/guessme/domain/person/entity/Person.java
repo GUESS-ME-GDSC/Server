@@ -1,5 +1,6 @@
 package gdsc.mju.guessme.domain.person.entity;
 
+import gdsc.mju.guessme.domain.person.dto.UpdatePersonDto;
 import gdsc.mju.guessme.domain.person.dto.UpdatePersonReqDto;
 import gdsc.mju.guessme.domain.user.entity.User;
 import java.time.LocalDate;
@@ -68,22 +69,13 @@ public class Person {
         this.user = user;
     }
 
-//    public void update(UpdatePersonReqDto updatePersonReqDto) {
-//        this.name = updatePersonReqDto.getName() != null ? updatePersonReqDto.getName() : this.name;
-//        this.relation = updatePersonReqDto.getRelation() != null ? updatePersonReqDto.getRelation() : this.relation;
-//        this.birth = updatePersonReqDto.getBirth() != null ? updatePersonReqDto.getBirth() : this.birth;
-//        this.residence = updatePersonReqDto.getResidence() != null ? updatePersonReqDto.getResidence() : this.residence;
-//        this.image = updatePersonReqDto.getImage() != null ? updatePersonReqDto.getImage() : this.image;
-//        this.voice = updatePersonReqDto.getVoice() != null ? updatePersonReqDto.getVoice() : this.voice;
-//    }
-
-    public void update(UpdatePersonReqDto updatePersonReqDto) {
-        this.name = updateIfNotNull(this.name, updatePersonReqDto.getName());
-        this.relation = updateIfNotNull(this.relation, updatePersonReqDto.getRelation());
-        this.birth = updateIfNotNull(this.birth, updatePersonReqDto.getBirth());
-        this.residence = updateIfNotNull(this.residence, updatePersonReqDto.getResidence());
-        this.image = updateIfNotNull(this.image, updatePersonReqDto.getImage());
-        this.voice = updateIfNotNull(this.voice, updatePersonReqDto.getVoice());
+    public void update(UpdatePersonDto updatePersonDto) {
+        this.name = updateIfNotNull(this.name, updatePersonDto.getName());
+        this.relation = updateIfNotNull(this.relation, updatePersonDto.getRelation());
+        this.birth = updateIfNotNull(this.birth, updatePersonDto.getBirth());
+        this.residence = updateIfNotNull(this.residence, updatePersonDto.getResidence());
+        this.image = updateIfNotNull(this.image, updatePersonDto.getImageUrl());
+        this.voice = updateIfNotNull(this.voice, updatePersonDto.getVoiceUrl());
     }
 
     private <T> T updateIfNotNull(T property, T value) {

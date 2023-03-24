@@ -67,8 +67,8 @@ public class PersonController {
     @PatchMapping("/{id}")
     public BaseResponse<Void> updatePerson(
         @PathVariable("id") Long personId,
-        @RequestBody UpdatePersonReqDto updatePersonReqDto
-    ) throws BaseException {
+        @ModelAttribute UpdatePersonReqDto updatePersonReqDto
+    ) throws BaseException, IOException {
         personService.updatePerson(personId, updatePersonReqDto);
         return new BaseResponse<>(
             201,
