@@ -16,8 +16,10 @@ import gdsc.mju.guessme.global.infra.gcs.GcsService;
 import gdsc.mju.guessme.global.response.BaseException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
@@ -46,15 +48,15 @@ public class PersonService {
             throw new BaseException(404, "User not found");
         }
 
-        // TODO: image upload to gcs
-        String imageUrl = gcsService.uploadFile(createPersonReqDto.getImage());
+        // Upload image to gcs
+        String imageUrl = createPersonReqDto.getImage() != null ?
+            gcsService.uploadFile(createPersonReqDto.getImage()) : null;
 
-        // TODO: voice upload to gcs
-        String voiceUrl = gcsService.uploadFile(createPersonReqDto.getVoice());
+        // Upload voice to gcs
+        String voiceUrl = createPersonReqDto.getVoice() != null ?
+            gcsService.uploadFile(createPersonReqDto.getVoice()) : null;
 
         // Person 저장
-//        String image = createPersonReqDto.getImage().toString();
-//        String voice = createPersonReqDto.getVoice().toString();
         personRepository.save(Person.builder()
             .image(imageUrl)
             .voice(voiceUrl)

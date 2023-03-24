@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 @ToString
 public class CreatePersonReqDto {
 
-
     private MultipartFile image;
     private MultipartFile voice;
     private String name;
