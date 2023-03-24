@@ -33,13 +33,12 @@ public class GcsService {
             file.getInputStream()
         );
 
-        System.out.println("uuid = " + uuid);
-
         return "https://storage.cloud.google.com/" + bucketName + "/" + uuid;
     }
 
-    public Blob downloadFile(String filePath) {
-        return null;
+    // delete file
+    public void deleteFile(String fileName) {
+        storage.delete(bucketName, fileName);
     }
 
 }
