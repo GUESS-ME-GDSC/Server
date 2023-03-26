@@ -32,7 +32,6 @@ public class AuthService {
     if(userRepository.findByUserId(joinReq.getUserId()).isPresent()) {
       throw new BaseException(400, "User already exists");
     }
-    System.out.println("joinReq = " + joinReq.toString());
     User newUser = joinReq.toUserEntity();
     newUser.hashPassword(bCryptPasswordEncoder);
 
@@ -49,8 +48,6 @@ public class AuthService {
               loginReq.getUserPassword()
           )
       );
-
-      System.out.println("authentication = " + authentication);
 
       return jwtTokenProvider.generateAccessToken(authentication);
     } catch (AuthenticationException e) {

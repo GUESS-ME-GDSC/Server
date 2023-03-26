@@ -8,6 +8,7 @@ class GuessmeApplicationTests {
 
 	@Test
 	void contextLoads() {
+		System.out.println("load context successfully");
 	}
 
 }
