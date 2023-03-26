@@ -40,11 +40,8 @@ public class SecurityConfig {
             .authorizeRequests()
             .antMatchers(
                 "/",
-                "/auth/signUp",
-                "/user/userList",
-                "/auth/signIn*",
-                "/user/profile/view/**",
-                "/auth/regenerateToken",
+                "/auth/login",
+                "/auth/join",
                 "/favicon.ico"
             ).permitAll()
             .anyRequest().authenticated();
