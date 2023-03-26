@@ -11,9 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {
-    List<Person> findByFavoriteTrue();
-
-    List<Person> findByFavoriteFalse();
+    List<Person> findByFavoriteAndUser_UserId(boolean favorite, String userId);
 
     List<Person> findByUser(User user);
 

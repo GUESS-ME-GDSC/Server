@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,23 +33,20 @@ public class PersonService {
     private final GcsService gcsService;
 
     public List<PersonResDto> getPersonList(
+        UserDetails userDetails,
         Boolean favorite
     ) {
-        if (favorite) {
-            return PersonResDto.of(personRepository.findByFavoriteTrue());
-        } else {
-            return PersonResDto.of(personRepository.findByFavoriteFalse());
-        }
+        return PersonResDto.of(personRepository.findByFavoriteAndUser_UserId(favorite,
+            userDetails.getUsername()));
     }
 
-    public void createPerson(CreatePersonReqDto createPersonReqDto)
-        throws BaseException, IOException {
-        // TODO: use test user now but need to use user from token
-        User user = userRepository.findByUserId("test")
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-        if (user == null) {
-            throw new BaseException(404, "User not found");
-        }
+    public void createPerson(
+        UserDetails userDetails,
+        CreatePersonReqDto createPersonReqDto
+    )
+        throws IOException {
+        User user = userRepository.findByUserId(userDetails.getUsername())
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // Upload image to gcs
         String imageUrl = createPersonReqDto.getImage() != null ?
@@ -70,7 +68,9 @@ public class PersonService {
             .build());
     }
 
-    public PersonDetailResDto getPerson(Long personId) throws BaseException {
+    public PersonDetailResDto getPersonDetail(
+        Long personId
+    ) throws BaseException {
         Person person = personRepository.findById(personId)
             .orElseThrow(
                 () -> new BaseException(404, "Person not found with that Id")
@@ -80,7 +80,10 @@ public class PersonService {
         return PersonDetailResDto.of(person, infoObjList);
     }
 
-    public void updatePerson(Long personId, UpdatePersonReqDto updatePersonReqDto)
+    public void updatePerson(
+        Long personId,
+        UpdatePersonReqDto updatePersonReqDto
+    )
         throws BaseException, IOException {
         Person person = personRepository.findById(personId)
             .orElseThrow(
@@ -126,7 +129,7 @@ public class PersonService {
          * update info entity with new data
          */
         List<InfoObj> updatedInfoObjList = updatePersonReqDto.getInfo();
-        if(updatedInfoObjList != null) {
+        if (updatedInfoObjList != null) {
             List<Info> infoList = infoRepository.findAllByPerson(person);
             // infoList에서 infoKey가 같은 Info를 찾아서 infoValue를 업데이트
             for (Info info : infoList) {
@@ -150,16 +153,23 @@ public class PersonService {
         }
     }
 
-    public void deletePerson(Long personId) {
+    public void deletePerson(
+        Long personId
+    ) {
         infoRepository.deleteAllInBatchByPersonId(personId);
         personRepository.deleteById(personId);
     }
 
-    public void toggleFavorite(Long personId) {
+    public void toggleFavorite(
+        Long personId
+    ) {
         personRepository.toggleFavorite(personId);
     }
 
-    public void addNewInfo(Long personId, AddInfoReqDto addInfoReqDto) throws BaseException {
+    public void addNewInfo(
+        Long personId,
+        AddInfoReqDto addInfoReqDto
+    ) throws BaseException {
         Person person = personRepository.findById(personId)
             .orElseThrow(
                 () -> new BaseException(404, "Person not found with that Id")
