@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 @Entity
@@ -32,9 +33,6 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private String userPassword;
-
-
-
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
@@ -55,6 +53,11 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return userId;
+    }
+
+    public User hashPassword(PasswordEncoder passwordEncoder) {
+        this.userPassword = passwordEncoder.encode(this.userPassword);
+        return this;
     }
 
     @Override

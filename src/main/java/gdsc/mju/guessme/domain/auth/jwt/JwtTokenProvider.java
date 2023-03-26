@@ -1,76 +1,92 @@
 package gdsc.mju.guessme.domain.auth.jwt;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
+import org.springframework.http.HttpStatus;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Base64;
 import java.util.Date;
-import java.util.List;
+
+import gdsc.mju.guessme.global.response.BaseException;
 
 @RequiredArgsConstructor
 @Component
 public class JwtTokenProvider {
+  @Value("${jwt.token.access-token-secret-key}")
+  private String access_token_secret_key;
 
-    private String secretKey = "webfirewood";
+  @Value("${jwt.token.access-token-expire-time}")
+  private long access_token_expire_time;
 
-    // 토큰 유효시간 30분
-    private long tokenValidTime = 30 * 60 * 1000L;
+  @Autowired
+  private UserDetailsService userDetailsService;
 
-    private final UserDetailsService userDetailsService;
+  /**
+   * 적절한 설정을 통해 Access 토큰을 생성하여 반환
+   * @param authentication
+   * @return access token
+   */
+  public String generateAccessToken(Authentication authentication) {
+    Claims claims = Jwts.claims().setSubject(authentication.getName());
+//    claims.put("auth", appUserRoles.stream().map(s -> new SimpleGrantedAuthority(s.getAuthority())).filter(Objects::nonNull).collect(Collectors.toList()));
 
-    // 객체 초기화, secretKey를 Base64로 인코딩한다.
-    @PostConstruct
-    protected void init() {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+    Date now = new Date();
+    Date expiresIn = new Date(now.getTime() + access_token_expire_time);
+
+    return Jwts.builder()
+        .setClaims(claims)
+        .setIssuedAt(now)
+        .setExpiration(expiresIn)
+        .signWith(SignatureAlgorithm.HS256, access_token_secret_key)
+        .compact();
+  }
+
+  /**
+   * Access 토큰으로부터 클레임을 만들고, 이를 통해 User 객체를 생성하여 Authentication 객체를 반환
+   * @param access_token
+   * @return Authentication
+   */
+  public Authentication getAuthenticationByAccessToken(String access_token) {
+    String userPrincipal = Jwts.parser().setSigningKey(access_token_secret_key).parseClaimsJws(access_token).getBody().getSubject();
+    UserDetails userDetails = userDetailsService.loadUserByUsername(userPrincipal);
+
+    return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+  }
+
+  /**
+   * http 헤더로부터 bearer 토큰을 가져옴.
+   * @param req
+   * @return String
+   */
+  public String resolveToken(HttpServletRequest req) {
+    String bearerToken = req.getHeader("Authorization");
+    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+      return bearerToken.substring(7);
     }
+    return null;
+  }
 
-    // JWT 토큰 생성
-    public String createToken(String userPk, List<String> roles) {
-        Claims claims = Jwts.claims().setSubject(userPk); // JWT payload 에 저장되는 정보단위
-        claims.put("roles", roles); // 정보는 key / value 쌍으로 저장된다.
-        Date now = new Date();
-        return Jwts.builder()
-                .setClaims(claims) // 정보 저장
-                .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + tokenValidTime)) // set Expire Time
-                .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘과
-                // signature 에 들어갈 secret값 세팅
-                .compact();
+  /**
+   * Access 토큰을 검증
+   * @param token
+   * @return boolean
+   */
+  public boolean validateAccessToken(String token) throws BaseException {
+    try {
+      Jwts.parser().setSigningKey(access_token_secret_key).parseClaimsJws(token);
+      return true;
+    } catch (JwtException e) {
+      // MalformedJwtException | ExpiredJwtException | IllegalArgumentException
+      throw new BaseException(500, "Error on Access Token");
     }
-
-    // JWT 토큰에서 인증 정보 조회
-    public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserPk(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-    }
-
-    // 토큰에서 회원 정보 추출
-    public String getUserPk(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-    }
-
-    // Request의 Header에서 token 값을 가져옵니다. "X-AUTH-TOKEN" : "TOKEN값'
-    public String resolveToken(HttpServletRequest request) {
-        return request.getHeader("X-AUTH-TOKEN");
-    }
-
-    // 토큰의 유효성 + 만료일자 확인
-    public boolean validateToken(String jwtToken) {
-        try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
-            return !claims.getBody().getExpiration().before(new Date());
-        } catch (Exception e) {
-            return false;
-        }
-    }
+  }
 }
