@@ -7,6 +7,8 @@ import gdsc.mju.guessme.domain.person.dto.AddInfoReqDto;
 import gdsc.mju.guessme.global.response.BaseException;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -31,21 +33,23 @@ public class PersonController {
 
     @GetMapping("/all")
     public BaseResponse<List<PersonResDto>> getPersonList(
+        @AuthenticationPrincipal UserDetails userDetails,
         @RequestParam Boolean favorite
     ) throws BaseException {
         return new BaseResponse<>(
             200,
             "Load Successfully",
-            personService.getPersonList(favorite)
+            personService.getPersonList(userDetails, favorite)
         );
     }
 
     @PostMapping
     public BaseResponse<Void> createPerson(
+        @AuthenticationPrincipal UserDetails userDetails,
         @ModelAttribute CreatePersonReqDto createPersonReqDto
     ) throws BaseException, IOException {
         System.out.println(createPersonReqDto.toString());
-        personService.createPerson(createPersonReqDto);
+        personService.createPerson(userDetails, createPersonReqDto);
         return new BaseResponse<>(
             201,
             "Create Successfully",
@@ -54,18 +58,20 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public BaseResponse<PersonDetailResDto> getPerson(
+    public BaseResponse<PersonDetailResDto> getPersonDetail(
+        @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable("id") Long personId
     ) throws BaseException {
         return new BaseResponse<>(
             200,
             "Load Successfully",
-            personService.getPerson(personId)
+            personService.getPersonDetail(personId)
         );
     }
 
     @PatchMapping("/{id}")
     public BaseResponse<Void> updatePerson(
+        @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable("id") Long personId,
         @ModelAttribute UpdatePersonReqDto updatePersonReqDto
     ) throws BaseException, IOException {
@@ -79,6 +85,7 @@ public class PersonController {
 
     @DeleteMapping("/{id}")
     public BaseResponse<Void> deletePerson(
+        @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable("id") Long personId
     ) throws BaseException {
         personService.deletePerson(personId);
@@ -91,6 +98,7 @@ public class PersonController {
 
     @PatchMapping("/{id}/favorite")
     public BaseResponse<Void> toggleFavorite(
+        @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable("id") Long personId
     ) throws BaseException {
         personService.toggleFavorite(personId);
@@ -103,6 +111,7 @@ public class PersonController {
 
     @PostMapping("/{id}/newinfo")
     public BaseResponse<Void> addNewInfo(
+        @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable("id") Long personId,
         @RequestBody AddInfoReqDto addInfoReqDto
     ) throws BaseException {

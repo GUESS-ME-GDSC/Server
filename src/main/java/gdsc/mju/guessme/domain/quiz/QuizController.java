@@ -6,6 +6,8 @@ import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
 import gdsc.mju.guessme.global.response.BaseException;
 import gdsc.mju.guessme.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -20,7 +22,10 @@ public class QuizController {
     // id 안넣으면 해당 유저의 랜덤 인물에 대한 출력
     // 우선 1번 유저 로그인 했다고 가정
     @GetMapping("/create/{personId}")
-    public BaseResponse<CreateQuizResDto> createQuiz(@PathVariable long personId) throws BaseException {
+    public BaseResponse<CreateQuizResDto> createQuiz(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable long personId
+    ) throws BaseException {
         return new BaseResponse<>(
                 200,
                 "Load Successfully",
@@ -30,7 +35,10 @@ public class QuizController {
 
     // 새 점수 등록
     @PatchMapping("/newscore")
-    public BaseResponse<Long> newscore(@RequestBody NewScoreDto newScoreDto) throws BaseException {
+    public BaseResponse<Long> newscore(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody NewScoreDto newScoreDto
+    ) throws BaseException {
         return new BaseResponse<>(
                 200,
                 "Load Successfully",
@@ -44,7 +52,10 @@ public class QuizController {
     // 클라이언트는 이미 인물 사진, 인물 이름, 문제 정답 가지고 있으므로 서버는 정답 여부만 Boolean으로 리턴해주면 됨.
     @PostMapping(value = "/scoring")
     // @requestbody 사용 시 formdata 오류. multidataForm 으로 넣으려면 어노테이션 빼야 함.
-    public BaseResponse<Boolean> scoring(@RequestBody ScoreReqDto dto) throws IOException {
+    public BaseResponse<Boolean> scoring(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody ScoreReqDto dto
+    ) throws IOException {
         // dto에 인물id, 인포키, 파일 주소 넣어서 전달
         return new BaseResponse<>(
                 200,
