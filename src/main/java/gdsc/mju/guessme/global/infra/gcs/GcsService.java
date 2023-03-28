@@ -33,7 +33,7 @@ public class GcsService {
             file.getInputStream()
         );
 
-        return "https://storage.cloud.google.com/" + bucketName + "/" + uuid;
+        return "https://storage.googleapis.com/" + bucketName + "/" + uuid;
     }
 
     // delete file
