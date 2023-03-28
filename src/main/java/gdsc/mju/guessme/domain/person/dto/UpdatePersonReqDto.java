@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
@@ -16,6 +17,7 @@ public class UpdatePersonReqDto {
     private MultipartFile voice;
     private String name;
     private String relation;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birth;
     private String residence;
     private List<InfoObj> info;
