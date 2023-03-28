@@ -9,6 +9,7 @@ import lombok.Getter;
 
 @Getter
 public class PersonDetailResDto {
+    private Long id;
     private String name;
     private String relation;
     private LocalDate birth;
@@ -19,8 +20,9 @@ public class PersonDetailResDto {
     private Boolean favorite;
 
     @Builder
-    public PersonDetailResDto(String name, String relation, LocalDate birth, String residence,
+    public PersonDetailResDto(Long id, String name, String relation, LocalDate birth, String residence,
         String image, String voice, List<InfoObj> info, Boolean favorite) {
+        this.id = id;
         this.name = name;
         this.relation = relation;
         this.birth = birth;
@@ -33,6 +35,7 @@ public class PersonDetailResDto {
 
     public static PersonDetailResDto of(Person person, List<InfoObj> info) {
         return PersonDetailResDto.builder()
+            .id(person.getId())
             .name(person.getName())
             .relation(person.getRelation())
             .birth(person.getBirth())
