@@ -113,6 +113,10 @@ public class QuizService {
         // 한글로만 입력 받는다고 가정, 두 글자 이상 연속으로 중복되는 경우 정답 처리
         String overlap = findOverlap(infoValue, textFromImage);
 
+        // 채점 후 삭제하기
+        String fileUUID = imageUrl.split("/")[4];
+        gcsService.deleteFile(fileUUID);
+
         if (overlap != null) {
             System.out.println("겹치는 단어: " + overlap);
             return Boolean.TRUE;
