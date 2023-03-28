@@ -53,8 +53,8 @@ public class QuizController {
     @PostMapping(value = "/scoring")
     // @requestbody 사용 시 formdata 오류. multidataForm 으로 넣으려면 어노테이션 빼야 함.
     public BaseResponse<Boolean> scoring(
-        @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody ScoreReqDto dto
+            @AuthenticationPrincipal UserDetails userDetails,
+            @ModelAttribute ScoreReqDto dto // requestBody 대신 @ModelAttribute??
     ) throws IOException {
         // dto에 인물id, 인포키, 파일 주소 넣어서 전달
         return new BaseResponse<>(

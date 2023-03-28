@@ -1,7 +1,6 @@
 package gdsc.mju.guessme.domain.quiz;
 
 import com.google.cloud.vision.v1.*;
-import com.google.protobuf.ByteString;
 import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import gdsc.mju.guessme.domain.info.repository.InfoRepository;
 import gdsc.mju.guessme.domain.person.entity.Person;
@@ -11,10 +10,9 @@ import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
 import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
 import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
+import gdsc.mju.guessme.global.infra.gcs.GcsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -25,6 +23,7 @@ public class QuizService {
     private final InfoRepository infoRepository;
     private final UserRepository userRepository;
     private final PersonRepository personRepository;
+    private final GcsService gcsService;
 
     public CreateQuizResDto createQuiz(long personId) {
 
@@ -65,14 +64,14 @@ public class QuizService {
         return newScoreDto.getScore();
     }
 
-    // 이미지에서 텍스트 추출
-    public String detectText(String filePath) throws IOException {
-
+    // 원격 이미지에서 텍스트 추출
+    // Detects text in the specified remote image on Google Cloud Storage.
+    // https://cloud.google.com/vision/docs/ocr?hl=ko
+    public String detectText(String gcsPath) throws IOException {
         List<AnnotateImageRequest> requests = new ArrayList<>();
 
-        ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
-
-        Image img = Image.newBuilder().setContent(imgBytes).build();
+        ImageSource imgSource = ImageSource.newBuilder().setImageUri(gcsPath).build();
+        Image img = Image.newBuilder().setSource(imgSource).build();
         Feature feat = Feature.newBuilder().setType(Feature.Type.TEXT_DETECTION).build();
         AnnotateImageRequest request =
                 AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
@@ -104,13 +103,19 @@ public class QuizService {
 
         String infoValue = dto.getInfoValue(); // 클라에서 갖고 있는 정답
 
-        String filePath = dto.getFilePath();
+        String imageUrl = dto.getImage() != null ?
+                gcsService.uploadFile(dto.getImage()) : null;
 
-        String textFromImage = detectText(filePath); // 이미지 추출 텍스트
+
+        String textFromImage = detectText(imageUrl); // 이미지 추출 텍스트
         System.out.println("textFromImage = " + textFromImage);
 
         // 한글로만 입력 받는다고 가정, 두 글자 이상 연속으로 중복되는 경우 정답 처리
         String overlap = findOverlap(infoValue, textFromImage);
+
+        // 채점 후 삭제하기
+        String fileUUID = imageUrl.split("/")[4];
+        gcsService.deleteFile(fileUUID);
 
         if (overlap != null) {
             System.out.println("겹치는 단어: " + overlap);
@@ -120,6 +125,7 @@ public class QuizService {
             return Boolean.FALSE;
         }
     }
+
 
     public String findOverlap(String str1, String str2) {
         // 더 긴 문자열 str1로 설정
