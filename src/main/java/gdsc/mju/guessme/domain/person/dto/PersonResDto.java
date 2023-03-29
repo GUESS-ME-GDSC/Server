@@ -15,23 +15,26 @@ public class PersonResDto {
     private String relation;
     private String image;
     private Long score;
+    private Boolean favorite;
 
     @Builder
-    public PersonResDto(String id, String name, String relation, String image, Long score) {
+    public PersonResDto(String id, String name, String relation, String image, Long score, Boolean favorite) {
         this.id = id;
         this.name = name;
         this.relation = relation;
         this.image = image;
         this.score = score;
+        this.favorite = favorite;
     }
 
-    public static PersonResDto of(String id, String name, String relation, String image, Long score) {
+    public static PersonResDto of(String id, String name, String relation, String image, Long score, Boolean favorite) {
         return PersonResDto.builder()
             .id(id)
             .name(name)
             .relation(relation)
             .image(image)
             .score(score)
+            .favorite(favorite)
             .build();
     }
 
@@ -42,7 +45,8 @@ public class PersonResDto {
                     person.getName(),
                     person.getRelation(),
                     person.getImage(),
-                    person.getScore()
+                    person.getScore(),
+                    person.getFavorite()
                 )
             );
         return Arrays.asList(personListStream.toArray(PersonResDto[]::new));
