@@ -5,8 +5,8 @@ import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import gdsc.mju.guessme.domain.info.repository.InfoRepository;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import gdsc.mju.guessme.domain.person.repository.PersonRepository;
-import gdsc.mju.guessme.domain.quiz.dto.CreateQuizResDto;
 import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
+import gdsc.mju.guessme.domain.quiz.dto.QuizDto;
 import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
 import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
@@ -25,10 +25,10 @@ public class QuizService {
     private final PersonRepository personRepository;
     private final GcsService gcsService;
 
-    public CreateQuizResDto createQuiz(long personId) {
 
-        // 1L 대신 해당 사용자 id 얻어서 사용
-        User user = userRepository.findById(1L)
+    public List<QuizDto> createQuiz(String username, long personId) {
+
+        User user = userRepository.findByUserId(username)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         Person person;
@@ -46,13 +46,52 @@ public class QuizService {
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인물입니다."));
         }
 
+        // person 구했을 때 기본 정보 quizdto 에 넣기.
+        List<QuizDto> quizDtoList = new ArrayList<>();
+
+        QuizDto dto1 = new QuizDto();
+
+        dto1.setQuestion("name");
+        dto1.setAnswer(person.getName());
+
+        quizDtoList.add(dto1);
+
+        QuizDto dto2 = new QuizDto();
+
+        dto2.setQuestion("relation");
+        dto2.setAnswer(person.getRelation());
+
+        quizDtoList.add(dto2);
+
+        QuizDto dto3 = new QuizDto();
+
+        dto3.setQuestion("birth");
+        dto3.setAnswer(person.getName());
+
+        quizDtoList.add(dto3);
+
+        QuizDto dto4 = new QuizDto();
+
+        dto4.setQuestion("residence");
+        dto4.setAnswer(person.getRelation());
+
+        quizDtoList.add(dto4);
+
         // InfoObj dto로 변환
         List<InfoObj> infoObjList = InfoObj.of(infoRepository.findAllByPerson(person));
 
-        return CreateQuizResDto.builder()
-                .person(person)
-                .info(infoObjList)
-                .build();
+
+        // info는 따로 빼서 for 문 돌리기
+
+        for (InfoObj elem : infoObjList) {
+            QuizDto dto = new QuizDto();
+            dto.setQuestion(elem.getInfoKey());
+            dto.setAnswer(elem.getInfoValue());
+            quizDtoList.add(dto);
+        }
+
+
+        return quizDtoList;
     }
 
     // 새 점수 등록
@@ -86,7 +125,6 @@ public class QuizService {
 
             for (AnnotateImageResponse res : responses) {
                 if (res.hasError()) {
-                    System.out.format("Error: %s%n", res.getError().getMessage());
                     return null;
                 }
 
@@ -108,7 +146,6 @@ public class QuizService {
 
 
         String textFromImage = detectText(imageUrl); // 이미지 추출 텍스트
-        System.out.println("textFromImage = " + textFromImage);
 
         // 한글로만 입력 받는다고 가정, 두 글자 이상 연속으로 중복되는 경우 정답 처리
         String overlap = findOverlap(infoValue, textFromImage);
@@ -118,10 +155,8 @@ public class QuizService {
         gcsService.deleteFile(fileUUID);
 
         if (overlap != null) {
-            System.out.println("겹치는 단어: " + overlap);
             return Boolean.TRUE;
         } else {
-            System.out.println("겹치는 단어가 없습니다.");
             return Boolean.FALSE;
         }
     }
