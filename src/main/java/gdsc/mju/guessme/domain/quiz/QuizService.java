@@ -7,6 +7,7 @@ import gdsc.mju.guessme.domain.person.entity.Person;
 import gdsc.mju.guessme.domain.person.repository.PersonRepository;
 import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
 import gdsc.mju.guessme.domain.quiz.dto.QuizDto;
+import gdsc.mju.guessme.domain.quiz.dto.QuizResDto;
 import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
 import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
@@ -26,7 +27,7 @@ public class QuizService {
     private final GcsService gcsService;
 
 
-    public List<QuizDto> createQuiz(String username, long personId) {
+    public QuizResDto createQuiz(String username, long personId) {
 
         User user = userRepository.findByUserId(username)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
@@ -45,6 +46,9 @@ public class QuizService {
             person = personRepository.findById(personId)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인물입니다."));
         }
+
+        // 결과적으로 반환할 QuizResDto
+        QuizResDto quizResDto = new QuizResDto();
 
         // person 구했을 때 기본 정보 quizdto 에 넣기.
         List<QuizDto> quizDtoList = new ArrayList<>();
@@ -91,7 +95,13 @@ public class QuizService {
         }
 
 
-        return quizDtoList;
+
+
+        return QuizResDto.builder()
+                .image(person.getImage())
+                .voice(person.getVoice())
+                .quizList(quizDtoList)
+                .build();
     }
 
     // 새 점수 등록
