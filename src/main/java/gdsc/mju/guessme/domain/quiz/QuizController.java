@@ -1,7 +1,7 @@
 package gdsc.mju.guessme.domain.quiz;
 
-import gdsc.mju.guessme.domain.quiz.dto.CreateQuizResDto;
 import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
+import gdsc.mju.guessme.domain.quiz.dto.QuizDto;
 import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
 import gdsc.mju.guessme.global.response.BaseException;
 import gdsc.mju.guessme.global.response.BaseResponse;
@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,18 +19,19 @@ import java.io.IOException;
 public class QuizController {
     private final QuizService quizService;
 
-    // 문제 전부 생성 (특정 인물 info 모두 가져오기)
+    // 문제 전부 생성
     // id 안넣으면 해당 유저의 랜덤 인물에 대한 출력
-    // 우선 1번 유저 로그인 했다고 가정
+
     @GetMapping("/create/{personId}")
-    public BaseResponse<CreateQuizResDto> createQuiz(
-        @AuthenticationPrincipal UserDetails userDetails,
-        @PathVariable long personId
+    public BaseResponse<List<QuizDto>> createQuiz(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable long personId
     ) throws BaseException {
+        String username = userDetails.getUsername();
         return new BaseResponse<>(
                 200,
                 "Load Successfully",
-                quizService.createQuiz(personId)
+                quizService.createQuiz(username, personId)
         );
     }
 
