@@ -31,8 +31,6 @@ public class QuizService {
         User user = userRepository.findByUserId(username)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        System.out.println("유저아이디: " + user.getUserId());
-
         Person person;
 
         // personId 안주어졌을 때
@@ -127,7 +125,6 @@ public class QuizService {
 
             for (AnnotateImageResponse res : responses) {
                 if (res.hasError()) {
-                    System.out.format("Error: %s%n", res.getError().getMessage());
                     return null;
                 }
 
@@ -149,7 +146,6 @@ public class QuizService {
 
 
         String textFromImage = detectText(imageUrl); // 이미지 추출 텍스트
-        System.out.println("textFromImage = " + textFromImage);
 
         // 한글로만 입력 받는다고 가정, 두 글자 이상 연속으로 중복되는 경우 정답 처리
         String overlap = findOverlap(infoValue, textFromImage);
@@ -159,10 +155,8 @@ public class QuizService {
         gcsService.deleteFile(fileUUID);
 
         if (overlap != null) {
-            System.out.println("겹치는 단어: " + overlap);
             return Boolean.TRUE;
         } else {
-            System.out.println("겹치는 단어가 없습니다.");
             return Boolean.FALSE;
         }
     }
