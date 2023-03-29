@@ -2,6 +2,7 @@ package gdsc.mju.guessme.domain.quiz;
 
 import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
 import gdsc.mju.guessme.domain.quiz.dto.QuizDto;
+import gdsc.mju.guessme.domain.quiz.dto.QuizResDto;
 import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
 import gdsc.mju.guessme.global.response.BaseException;
 import gdsc.mju.guessme.global.response.BaseResponse;
@@ -23,7 +24,7 @@ public class QuizController {
     // id 안넣으면 해당 유저의 랜덤 인물에 대한 출력
 
     @GetMapping("/create/{personId}")
-    public BaseResponse<List<QuizDto>> createQuiz(
+    public BaseResponse<QuizResDto> createQuiz(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable long personId
     ) throws BaseException {
