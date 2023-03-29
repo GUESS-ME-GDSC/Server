@@ -18,7 +18,7 @@ public class CreateQuizResDto {
     private String image;
     private String voice;
     private String name;
-    private String realtion;
+    private String relation;
     private LocalDate birth;
     private String residence;
     private List<InfoObj> info;
@@ -30,7 +30,7 @@ public class CreateQuizResDto {
         this.image = person.getImage();
         this.voice = person.getVoice();
         this.name = person.getName();
-        this.realtion = person.getRelation();
+        this.relation = person.getRelation();
         this.birth = person.getBirth();
         this.residence = person.getResidence();
         this.info = info;
