@@ -7,18 +7,19 @@ import lombok.Getter;
 
 @Getter
 public class InfoObj {
-
+    private Long id;
     private String infoKey;
     private String infoValue;
 
-    public InfoObj(String infoKey, String infoValue) {
+    public InfoObj(Long id, String infoKey, String infoValue) {
+        this.id = id;
         this.infoKey = infoKey;
         this.infoValue = infoValue;
     }
 
     public static List<InfoObj> of(List<Info> byPerson) {
         return byPerson.stream()
-            .map(info -> new InfoObj(info.getInfoKey(), info.getInfoValue()))
+            .map(info -> new InfoObj(info.getId(), info.getInfoKey(), info.getInfoValue()))
             .collect(Collectors.toList());
     }
 }
