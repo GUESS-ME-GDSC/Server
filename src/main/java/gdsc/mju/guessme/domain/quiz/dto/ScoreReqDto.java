@@ -12,6 +12,5 @@ import org.springframework.web.multipart.MultipartFile;
 @ToString
 public class ScoreReqDto {
     private String infoValue;
-    private String answer; // 사진
     private MultipartFile image;
 }
