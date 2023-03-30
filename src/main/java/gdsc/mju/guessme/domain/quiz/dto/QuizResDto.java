@@ -10,12 +10,14 @@ import java.util.List;
 public class QuizResDto {
     private String image;
     private String voice;
+    private Long score;
     private List<QuizDto> quizList;
 
     @Builder
-    public QuizResDto(String image, String voice, List<QuizDto> quizList) {
+    public QuizResDto(String image, String voice, Long score, List<QuizDto> quizList) {
         this.image = image;
         this.voice = voice;
+        this.score = score;
         this.quizList = quizList;
     }
 }

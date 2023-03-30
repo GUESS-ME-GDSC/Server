@@ -47,9 +47,6 @@ public class QuizService {
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인물입니다."));
         }
 
-        // 결과적으로 반환할 QuizResDto
-        QuizResDto quizResDto = new QuizResDto();
-
         // person 구했을 때 기본 정보 quizdto 에 넣기.
         List<QuizDto> quizDtoList = new ArrayList<>();
 
@@ -94,12 +91,10 @@ public class QuizService {
             quizDtoList.add(dto);
         }
 
-
-
-
         return QuizResDto.builder()
                 .image(person.getImage())
                 .voice(person.getVoice())
+                .score(person.getScore())
                 .quizList(quizDtoList)
                 .build();
     }
