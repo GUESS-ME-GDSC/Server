@@ -101,9 +101,6 @@ public class QuizService {
 
     // 새 점수 등록
     public Long newscore(NewScoreDto newScoreDto) {
-        Person person = personRepository.findById(newScoreDto.getPersonId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인물입니다."));
-
         personRepository.updateScore(newScoreDto.getPersonId(), newScoreDto.getScore());
         return newScoreDto.getScore();
     }
