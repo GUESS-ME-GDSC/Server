@@ -92,9 +92,9 @@ public class QuizService {
         }
 
         return QuizResDto.builder()
+                .personId(person.getId())
                 .image(person.getImage())
                 .voice(person.getVoice())
-                .score(person.getScore())
                 .quizList(quizDtoList)
                 .build();
     }
