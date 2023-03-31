@@ -77,8 +77,21 @@ There is **Two key features** exist.
 
 ### 😎 Android
 
-- [Android](https://developer.android.com/)
-- [Kotlin](https://kotlinlang.org/)
+- **Architecture**
+  - MVVM
+- **Android Jetpack**
+  - ViewModel
+  - LiveData
+  - View Binding
+  - Navigation
+  - Paging
+- **Network**
+  - Retrofit2 / okHttp3
+- **Asynchronous**
+  - Kotlin Coroutine
+- **Database**
+  - DataStore
+- **DI** \* Hilt
 
 <h2 id="gettingstarted"> 🏃 Getting Started </h2>
 
