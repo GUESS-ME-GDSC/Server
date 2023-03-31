@@ -18,6 +18,14 @@
 
 **Guess me! (friend & family)** is a person information storage/writing quiz app for preventing memory loss and family memory of the elderly.
 
+### **Goal 3. Good Health and Well-Being**
+
+[THE 17 GOALS | Sustainable Development](https://sdgs.un.org/goals/goal3)
+
+> Our solution focuses on the **United Nations' Sustainable Development goal of Good Health & Wellbeing**. Ensure healthy lives and promote well-being for all at all ages specifically targeting the elderly population.
+
+<br>
+
 > How can we prevent an increase in the incidence of dementia in the elderly population and help them maintain memories of their loved ones? Dementia is a progressive disease that affects millions of people worldwide and can be fatal not only to individuals but also to family and friends. As the world's population ages, the proportion of people with dementia is increasing, and this trend poses a significant challenge to individuals, families and communities around the world.
 
 > Our project aims to develop ways to reduce the risk of dementia and promote healthy aging in the elderly population. The memory loss of a loved one due to dementia is a major problem that we are trying to solve. Handwriting and quiz-type repetitive learning have been shown to be effective in promoting brain activity, strengthening memory, and improving cognitive ability in the elderly. By encouraging these activities, we hope to reduce the risk of dementia and help individuals maintain memories of their loved ones.
