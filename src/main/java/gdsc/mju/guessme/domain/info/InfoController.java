@@ -20,7 +20,7 @@ public class InfoController {
     ) {
         infoService.deleteInfoByIdList(deleteInfoByIdListReqDto);
         return new BaseResponse<>(
-            201,
+            200,
             "Delete Info Successfully",
             null
         );
