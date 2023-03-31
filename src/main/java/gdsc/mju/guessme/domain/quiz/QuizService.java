@@ -67,14 +67,14 @@ public class QuizService {
         QuizDto dto3 = new QuizDto();
 
         dto3.setQuestion("birth");
-        dto3.setAnswer(person.getName());
+        dto3.setAnswer(person.getBirth().toString());
 
         quizDtoList.add(dto3);
 
         QuizDto dto4 = new QuizDto();
 
         dto4.setQuestion("residence");
-        dto4.setAnswer(person.getRelation());
+        dto4.setAnswer(person.getResidence());
 
         quizDtoList.add(dto4);
 
