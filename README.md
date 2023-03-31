@@ -202,9 +202,9 @@ Server/
     <tbody>
     <tr>
         <th>Name</th>
-        <td width="100" align="center">Kim HaeChan</td>
-        <td width="100" align="center">Kim JeongHo</td>
-        <td width="100" align="center">Mun yuri</td>
+        <td width="100" align="center">HaeChan Kim</td>
+        <td width="100" align="center">JeongHo Kim</td>
+        <td width="100" align="center">Yuri Mun</td>
     </tr>
     <tr>
         <th>Role</th>
