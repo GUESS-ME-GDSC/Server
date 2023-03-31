@@ -57,7 +57,7 @@ There is **Two key features** exist.
  
 <h2 id="stacks"> 🛠️  Tech Stacks </h2>
 
-<img width="500" alt="Guessme_project_architecture" src="https://user-images.githubusercontent.com/65845941/229057300-5074a74c-d4de-4222-a8ee-59ad32e63125.png">
+<img width="500" alt="Guessme_project_architecture" src="https://user-images.githubusercontent.com/65845941/229068477-4913d2c9-79f0-4f10-83e9-a0b599ddf0b0.png">
 
 ### 🚉 Platform
 
@@ -84,14 +84,14 @@ There is **Two key features** exist.
   - LiveData
   - View Binding
   - Navigation
-  - Paging
 - **Network**
   - Retrofit2 / okHttp3
 - **Asynchronous**
   - Kotlin Coroutine
 - **Database**
   - DataStore
-- **DI** \* Hilt
+- **DI**
+  - Hilt
 
 <h2 id="gettingstarted"> 🏃 Getting Started </h2>
 
@@ -202,9 +202,9 @@ Server/
     <tbody>
     <tr>
         <th>Name</th>
-        <td width="100" align="center">Kim HaeChan</td>
-        <td width="100" align="center">Kim JeongHo</td>
-        <td width="100" align="center">Mun yuri</td>
+        <td width="100" align="center">HaeChan Kim</td>
+        <td width="100" align="center">JeongHo Kim</td>
+        <td width="100" align="center">Yuri Mun</td>
     </tr>
     <tr>
         <th>Role</th>
