@@ -84,14 +84,14 @@ There is **Two key features** exist.
   - LiveData
   - View Binding
   - Navigation
-  - Paging
 - **Network**
   - Retrofit2 / okHttp3
 - **Asynchronous**
   - Kotlin Coroutine
 - **Database**
   - DataStore
-- **DI** \* Hilt
+- **DI**
+  - Hilt
 
 <h2 id="gettingstarted"> 🏃 Getting Started </h2>
 
