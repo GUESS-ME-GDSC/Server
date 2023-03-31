@@ -9,8 +9,9 @@
 <p align="center"><a href="#">Demo Video</a>
 </p>
 <p align="center">
- <img alt="GitHub language count" src="https://img.shields.io/github/contributors/GUESS-ME-GDSC/Android?style=for-the-badge&logo">
- <img alt="GitHub language count" src="https://img.shields.io/github/issues-closed/GUESS-ME-GDSC/Android?style=for-the-badge&logo">
+ <img alt="GitHub language count" src="https://img.shields.io/github/contributors/GUESS-ME-GDSC/Server?style=for-the-badge&logo">
+ <img alt="GitHub language count" src="https://img.shields.io/github/issues-closed/GUESS-ME-GDSC/Server?style=for-the-badge&logo">
+ <img alt="GitHub language count" src="https://img.shields.io/github/stars/GUESS-ME-GDSC/Server?style=for-the-badge&logo">
 </p>
 
 ## 👋 Project Overview
@@ -64,7 +65,7 @@ There is **Two key features** exist.
  
 <h2 id="stacks"> 🛠️  Tech Stacks </h2>
 
-<img width="500" alt="Guessme_project_architecture" src="https://user-images.githubusercontent.com/65845941/229057300-5074a74c-d4de-4222-a8ee-59ad32e63125.png">
+<img width="500" alt="Guessme_project_architecture" src="https://user-images.githubusercontent.com/65845941/229068477-4913d2c9-79f0-4f10-83e9-a0b599ddf0b0.png">
 
 ### 🚉 Platform
 
@@ -103,11 +104,103 @@ There is **Two key features** exist.
 <h2 id="gettingstarted"> 🏃 Getting Started </h2>
 
 You don't need to install anything to run Guessme.
+It's all deployed on the cloud.
 
-👀 But there's one thing to watch out for!
-> In the case of the ocr used for grading, when an image with no characters comes in, the error processing may not be perfect, resulting in an error! 
+The only thing you need is a [Android Client](https://github.com/GUESS-ME-GDSC/Android).
 
-### → Please use an image containing characters!
+<h2 id="structure"> 🕹️ Source Code Structure </h2>
+
+### Server
+
+```
+Server/
+└─ src
+   ├─ main
+   │  ├─ java
+   │  │  └─ gdsc
+   │  │     └─ mju
+   │  │        └─ guessme
+   │  │           ├─ GuessmeApplication.java
+   │  │           ├─ domain
+   │  │           │  ├─ auth
+   │  │           │  │  ├─ AuthController.java
+   │  │           │  │  ├─ AuthService.java
+   │  │           │  │  ├─ UserDetailsServiceImpl.java
+   │  │           │  │  ├─ dto
+   │  │           │  │  │  └─ AuthReqDto.java
+   │  │           │  │  └─ jwt
+   │  │           │  │     ├─ JwtTokenFilter.java
+   │  │           │  │     └─ JwtTokenProvider.java
+   │  │           │  ├─ info
+   │  │           │  │  ├─ InfoController.java
+   │  │           │  │  ├─ InfoService.java
+   │  │           │  │  ├─ dto
+   │  │           │  │  │  ├─ DeleteInfoByIdListReqDto.java
+   │  │           │  │  │  └─ InfoObj.java
+   │  │           │  │  ├─ entity
+   │  │           │  │  │  └─ Info.java
+   │  │           │  │  └─ repository
+   │  │           │  │     └─ InfoRepository.java
+   │  │           │  ├─ person
+   │  │           │  │  ├─ PersonController.java
+   │  │           │  │  ├─ PersonService.java
+   │  │           │  │  ├─ dto
+   │  │           │  │  │  ├─ AddInfoReqDto.java
+   │  │           │  │  │  ├─ CreatePersonReqDto.java
+   │  │           │  │  │  ├─ PersonDetailResDto.java
+   │  │           │  │  │  ├─ PersonResDto.java
+   │  │           │  │  │  ├─ UpdatePersonDto.java
+   │  │           │  │  │  └─ UpdatePersonReqDto.java
+   │  │           │  │  ├─ entity
+   │  │           │  │  │  └─ Person.java
+   │  │           │  │  └─ repository
+   │  │           │  │     └─ PersonRepository.java
+   │  │           │  ├─ quiz
+   │  │           │  │  ├─ QuizController.java
+   │  │           │  │  ├─ QuizService.java
+   │  │           │  │  └─ dto
+   │  │           │  │     ├─ NewScoreDto.java
+   │  │           │  │     ├─ QuizDto.java
+   │  │           │  │     ├─ QuizResDto.java
+   │  │           │  │     └─ ScoreReqDto.java
+   │  │           │  └─ user
+   │  │           │     ├─ UserController.java
+   │  │           │     ├─ UserService.java
+   │  │           │     ├─ dto
+   │  │           │     │  ├─ BlahBlahReqDto.java
+   │  │           │     │  └─ BlahResDto.java
+   │  │           │     ├─ entity
+   │  │           │     │  └─ User.java
+   │  │           │     └─ repository
+   │  │           │        └─ UserRepository.java
+   │  │           └─ global
+   │  │              ├─ config
+   │  │              │  ├─ JwtSecurityConfig.java
+   │  │              │  └─ SecurityConfig.java
+   │  │              ├─ infra
+   │  │              │  └─ gcs
+   │  │              │     ├─ GCSConfig.java
+   │  │              │     └─ GcsService.java
+   │  │              └─ response
+   │  │                 ├─ BaseException.java
+   │  │                 ├─ BaseResponse.java
+   │  │                 ├─ ExceptionController.java
+   │  │                 └─ UserNotFoundException.java
+   │  └─ resources
+   │     ├─ application.properties
+   │     ├─ static
+   │     └─ templates
+   └─ test
+      └─ java
+         └─ gdsc
+            └─ mju
+               └─ guessme
+                  ├─ GuessmeApplicationTests.java
+                  └─ domain
+                     └─ auth
+                        └─ AuthServiceTest.java
+
+```
 
 <h2 id="teaminfo"> 👨‍👦‍👦 Team Info </h2>
 
@@ -117,9 +210,9 @@ You don't need to install anything to run Guessme.
     <tbody>
     <tr>
         <th>Name</th>
-        <td width="100" align="center">Kim HaeChan</td>
-        <td width="100" align="center">Kim JeongHo</td>
-        <td width="100" align="center">Mun yuri</td>
+        <td width="100" align="center">HaeChan Kim</td>
+        <td width="100" align="center">JeongHo Kim</td>
+        <td width="100" align="center">Yuri Mun</td>
     </tr>
     <tr>
         <th>Role</th>
