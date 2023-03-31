@@ -14,13 +14,17 @@
  <img alt="GitHub language count" src="https://img.shields.io/github/stars/GUESS-ME-GDSC/Server?style=for-the-badge&logo">
 </p>
 
-## 👋 Project Introduction
+## 👋 Project Overview
 
-**Guess me! (friend & family)** 는 고령층의 기억력 감퇴 예방과 가족 기억을 위한 인물 정보 저장 / 글쓰기 퀴즈 앱입니다.
+**Guess me! (friend & family)** is a person information storage/writing quiz app for preventing memory loss and family memory of the elderly.
 
-> 모든 연령층을 위한 건강한 삶 보장과 복지를 증진하는 것은 매우 중요한 과제입니다.<br> > **Guess me! (friend & family)** 는 노인의 치매를 예방하고 약해져 가는 기억력 때문에 소중한 사람을 잊지 않도록 돕고자 합니다.<br>
->
-> 더 나아가, 서비스를 이용하면서 가까운 사람들의 정보를 입력할 때 기본 정보는 물론이고 뭘 좋아하는지, 옷 취향은 어떤지 등을 추가로 알아가기는 시간을 가지고, 서로 사진찍고 음성을 녹음하는 과정도 거치며 소통하는 소중한 시간을 더 만들어주는 매개체로써 동작하고자 합니다.
+> How can we prevent an increase in the incidence of dementia in the elderly population and help them maintain memories of their loved ones? Dementia is a progressive disease that affects millions of people worldwide and can be fatal not only to individuals but also to family and friends. As the world's population ages, the proportion of people with dementia is increasing, and this trend poses a significant challenge to individuals, families and communities around the world.
+
+> Our project aims to develop ways to reduce the risk of dementia and promote healthy aging in the elderly population. The memory loss of a loved one due to dementia is a major problem that we are trying to solve. Handwriting and quiz-type repetitive learning have been shown to be effective in promoting brain activity, strengthening memory, and improving cognitive ability in the elderly. By encouraging these activities, we hope to reduce the risk of dementia and help individuals maintain memories of their loved ones.
+
+> Ultimately, **Guess me! (friend & family)** aims to contribute to global efforts to improve the lives of individuals, families and communities around the world by preventing dementia and promoting healthy aging in the elderly. We hope to reduce the burden of dementia on individuals, families, and society as a whole by focusing on early prevention and intervention.<br>
+
+> Furthermore, when entering information from close people while using the service, we want to create time to know what we like, what we like, and how we like clothes, and to make more valuable time to communicate through the process of taking pictures and recording voices.
 
 ## 📖 Table of Contents
 
@@ -30,26 +34,26 @@
  <li><a href="#expectation">Expectation</a></li>
  <li><a href="#competitiveness">Competitiveness</a></li>
  <li><a href="#gettingstarted">Getting Started</a></li>
- <li><a href="#structure">Folder Structure</a></li>
+ <li><a href="#structure">Source Code Structure</a></li>
  <li><a href="#teaminfo">TEAM INFO</a></li>
 </ol>
 
 <h2 id="features"> ✨ Key Features </h2>
 
-**2가지 핵심 기능**이 존재합니다.
+There is **Two key features** exist.
 
-- **인물 등록**
-- **퀴즈 풀기**
+- **Register Person Information**
+- **Quiz about registered people**
 
 <h2 id="expectation"> ✨ Expectations </h2>
  
- ### 👍 기억력 강화
-  - 퀴즈를 풀면서 뇌 활동을 촉진할 수 있습니다.
-  - 글쓰기를 통해 답을 제출함으로써 치매 예방에 도움이 됩니다.
+ ### 👍 Memory Enhancement
+- You can promote brain activity by taking quizzes.
+- It helps prevent dementia by submitting answers through writing.
  
- ### 🤝 가족 간 소통 활성화
-  - 서비스를 사용하게 되면 반드시 가족과 소통하는 시간을 가지게 됩니다.
-  - 가족들의 정보를 입력하면서 서로를 더 알아갈 수 있습니다.
+ ### 🤝 Enabling Family Communication
+- If you use the service, you will have time to communicate with your family.
+- You can get to know each other more by entering your family's information.
  
 <h2 id="stacks"> 🛠️  Tech Stacks </h2>
 
@@ -76,14 +80,14 @@
 - [Android](https://developer.android.com/)
 - [Kotlin](https://kotlinlang.org/)
 
-<h2 id="gettingstarted"> 🏃 프로젝트 사용법 (Getting Started) </h2>
+<h2 id="gettingstarted"> 🏃 Getting Started </h2>
 
 You don't need to install anything to run Guessme.
 It's all deployed on the cloud.
 
 The only thing you need is a [Android Client](https://github.com/GUESS-ME-GDSC/Android).
 
-<h2 id="structure"> 🕹️ 소스코드 구조 (Source Code Structure) </h2>
+<h2 id="structure"> 🕹️ Source Code Structure </h2>
 
 ### Server
 
@@ -184,13 +188,13 @@ Server/
     </thead>
     <tbody>
     <tr>
-        <th>이름</th>
+        <th>Name</th>
         <td width="100" align="center">Kim HaeChan</td>
         <td width="100" align="center">Kim JeongHo</td>
         <td width="100" align="center">Mun yuri</td>
     </tr>
     <tr>
-        <th>역할</th>
+        <th>Role</th>
         <td width="150" align="center">
             Server
         </td>
@@ -220,7 +224,7 @@ Server/
         </td>
     </tr>
     <tr>
-        <th>이메일</th>
+        <th>Email</th>
         <td width="175" align="center">
             <a href="mailto:er196725@googlemail.com">
                 <img src="https://img.shields.io/badge/er196725@googlemail.com-green?logo=gmail&style=social">
