@@ -26,6 +26,23 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+	implementation 'com.google.cloud:google-cloud-vision:2.0.17'
+	implementation 'org.springframework.cloud:spring-cloud-gcp-starter-vision:1.2.8.RELEASE'
+	implementation platform('com.google.cloud:libraries-bom:26.1.4')
+	implementation 'com.google.cloud:google-cloud-translate'
+
+	implementation group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter', version: '1.2.5.RELEASE'
+	implementation group: 'org.springframework.cloud', name: 'spring-cloud-gcp-storage', version: '1.2.5.RELEASE'
+
+	/*
+	Security
+	 */
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	/*
+	Jwt (Jwt Support for the JVM)
+	 */
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 }
 
 tasks.named('test') {

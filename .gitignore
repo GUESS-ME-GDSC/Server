@@ -1,7 +1,14 @@
 # dotenv environment variables file
 .env
+.env.dev
+.env.test
+.env.prod
+.env.dev
 .prod.env
 .test.env
+
+# credential file
+*.json
 
 # Querydsl
 /src/main/generated
