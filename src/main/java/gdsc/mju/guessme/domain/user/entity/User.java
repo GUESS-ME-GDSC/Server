@@ -1,6 +1,7 @@
 package gdsc.mju.guessme.domain.user.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +34,10 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private String userPassword;
+
+    @Email
+    @Column(nullable = false)
+    private String email;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
