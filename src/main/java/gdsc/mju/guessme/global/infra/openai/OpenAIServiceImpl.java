@@ -1,5 +1,8 @@
 package gdsc.mju.guessme.global.infra.openai;
 
+import gdsc.mju.guessme.global.infra.openai.dto.ChatRequest;
+import gdsc.mju.guessme.global.infra.openai.dto.ChatResponse;
+import gdsc.mju.guessme.global.infra.openai.dto.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -7,9 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
-public class ChatgptServiceImpl implements ChatgptService {
+public class OpenAIServiceImpl implements OpenAIService {
     @Qualifier("openaiRestTemplate")
     @Autowired
     private final RestTemplate restTemplate;
@@ -21,37 +26,14 @@ public class ChatgptServiceImpl implements ChatgptService {
     private String apiUrl;
 
     @Override
-    public String sendMessage(String message) {
-        return null;
-    }
+    public ChatResponse createCompletion(String prompt) {
+        // create a request
+        List<Message> messages = List.of(
+                new Message(prompt)
+        );
+        ChatRequest request = new ChatRequest(model, messages, 0.9);
 
-    @Override
-    public ChatResponse sendChatRequest(ChatRequest request) {
-        return null;
-    }
-
-    @Override
-    public String multiChat(List<MultiChatMessage> messages) {
-        return null;
-    }
-
-    @Override
-    public MultiChatResponse multiChatRequest(MultiChatRequest multiChatRequest) {
-        return null;
-    }
-
-    @Override
-    public String imageGenerate(String prompt) {
-        return null;
-    }
-
-    @Override
-    public List<String> imageGenerate(String prompt, Integer n, ImageSize size, ImageFormat format) {
-        return null;
-    }
-
-    @Override
-    public ImageResponse imageGenerateRequest(ImageRequest imageRequest) {
-        return null;
+        // call the API
+        return restTemplate.postForObject(apiUrl, request, ChatResponse.class);
     }
 }

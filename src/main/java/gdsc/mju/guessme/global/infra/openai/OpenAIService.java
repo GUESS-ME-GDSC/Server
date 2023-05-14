@@ -1,9 +1,7 @@
 package gdsc.mju.guessme.global.infra.openai;
 
-public interface ChatgptService {
+import gdsc.mju.guessme.global.infra.openai.dto.ChatResponse;
 
-    String sendMessage(String message);
-
-    ChatResponse sendChatRequest(ChatRequest request);
-
+public interface OpenAIService {
+    ChatResponse createCompletion(String prompt);
 }
