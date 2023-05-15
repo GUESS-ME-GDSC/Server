@@ -15,6 +15,7 @@ import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
 import gdsc.mju.guessme.global.infra.gcs.GcsService;
 import gdsc.mju.guessme.global.response.BaseException;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -33,54 +34,46 @@ public class PersonService {
     private final GcsService gcsService;
 
     public List<PersonResDto> getPersonList(
-        UserDetails userDetails,
-        Boolean favorite
+            UserDetails userDetails,
+            Boolean favorite
     ) {
         return PersonResDto.of(personRepository.findByFavoriteAndUser_UserId(favorite,
-            userDetails.getUsername()));
+                userDetails.getUsername()));
     }
 
     public void createPerson(
-        UserDetails userDetails,
-        CreatePersonReqDto createPersonReqDto
+            UserDetails userDetails,
+            CreatePersonReqDto createPersonReqDto
     )
-        throws IOException {
+            throws IOException {
         User user = userRepository.findByUserId(userDetails.getUsername())
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // Upload image to gcs
         String imageUrl = createPersonReqDto.getImage() != null ?
-            gcsService.uploadFile(createPersonReqDto.getImage()) : null;
+                gcsService.uploadFile(createPersonReqDto.getImage()) : null;
 
         // Upload voice to gcs
         String voiceUrl = createPersonReqDto.getVoice() != null ?
-            gcsService.uploadFile(createPersonReqDto.getVoice()) : null;
+                gcsService.uploadFile(createPersonReqDto.getVoice()) : null;
 
         // Person 저장
         personRepository.save(Person.builder()
-            .image(imageUrl)
-            .voice(voiceUrl)
-            .name(createPersonReqDto.getName())
-            .relation(createPersonReqDto.getRelation())
-            .birth(createPersonReqDto.getBirth())
-            .residence(createPersonReqDto.getResidence())
-            .user(user)
-            .build());
+                .image(imageUrl)
+                .voice(voiceUrl)
+                .name(createPersonReqDto.getName())
+                .relation(createPersonReqDto.getRelation())
+                .birth(createPersonReqDto.getBirth())
+                .residence(createPersonReqDto.getResidence())
+                .user(user)
+                .build());
     }
 
     public PersonDetailResDto getPersonDetail(
-        UserDetails userDetails,
-        Long personId
+            UserDetails userDetails,
+            Long personId
     ) throws BaseException {
-        Person person = personRepository.findById(personId)
-            .orElseThrow(
-                () -> new BaseException(404, "Person not found with that Id")
-            );
-
-        // Check if the person belongs to the user
-        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
-            throw new BaseException(403, "Your not allowed to access this person");
-        }
+        Person person = this.loadPersonWithAccessCheck(userDetails, personId);
 
         List<InfoObj> infoObjList = InfoObj.of(infoRepository.findAllByPerson(person));
 
@@ -88,20 +81,12 @@ public class PersonService {
     }
 
     public void updatePerson(
-        UserDetails userDetails,
-        Long personId,
-        UpdatePersonReqDto updatePersonReqDto
+            UserDetails userDetails,
+            Long personId,
+            UpdatePersonReqDto updatePersonReqDto
     )
-        throws BaseException, IOException {
-        Person person = personRepository.findById(personId)
-            .orElseThrow(
-                () -> new BaseException(404, "Person not found with that Id")
-            );
-
-        // Check if the person belongs to the user
-        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
-            throw new BaseException(403, "Your not allowed to access this person");
-        }
+            throws BaseException, IOException {
+        Person person = this.loadPersonWithAccessCheck(userDetails, personId);
 
         /**
          * update person entity with new data
@@ -119,21 +104,21 @@ public class PersonService {
         // Upload image to gcs
         MultipartFile image = updatePersonReqDto.getImage();
         String imageUrl = image != null ?
-            gcsService.uploadFile(image) : null;
+                gcsService.uploadFile(image) : null;
 
         // Upload voice to gcs
         MultipartFile voice = updatePersonReqDto.getVoice();
         String voiceUrl = voice != null ?
-            gcsService.uploadFile(voice) : null;
+                gcsService.uploadFile(voice) : null;
 
         UpdatePersonDto updatePersonDto = new UpdatePersonDto(
-            imageUrl,
-            voiceUrl,
-            updatePersonReqDto.getName(),
-            updatePersonReqDto.getRelation(),
-            updatePersonReqDto.getBirth(),
-            updatePersonReqDto.getResidence(),
-            updatePersonReqDto.getInfo()
+                imageUrl,
+                voiceUrl,
+                updatePersonReqDto.getName(),
+                updatePersonReqDto.getRelation(),
+                updatePersonReqDto.getBirth(),
+                updatePersonReqDto.getResidence(),
+                updatePersonReqDto.getInfo()
         );
         person.update(updatePersonDto);
         personRepository.save(person);
@@ -167,64 +152,53 @@ public class PersonService {
     }
 
     public void deletePerson(
-        UserDetails userDetails,
-        Long personId
+            UserDetails userDetails,
+            Long personId
     ) throws BaseException {
         // load person
-        Person person = personRepository.findById(personId)
-            .orElseThrow(
-                () -> new BaseException(404, "Person not found with that Id")
-            );
-
-        // Check if the person belongs to the user
-        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
-            throw new BaseException(403, "Your not allowed to access this person");
-        }
+        Person person = this.loadPersonWithAccessCheck(userDetails, personId);
 
         // Delete person
         personRepository.delete(person);
     }
 
     public void toggleFavorite(
-        UserDetails userDetails,
-        Long personId
+            UserDetails userDetails,
+            Long personId
     ) throws BaseException {
-        // load person with child infos if user is owner
+        Person person = this.loadPersonWithAccessCheck(userDetails, personId);
+
+        personRepository.toggleFavorite(personId);
+    }
+
+    public void addNewInfo(
+            UserDetails userDetails,
+            Long personId,
+            AddInfoReqDto addInfoReqDto
+    ) throws BaseException {
+        Person person = this.loadPersonWithAccessCheck(userDetails, personId);
+
+        List<InfoObj> newInfoObjList = addInfoReqDto.getInfo();
+        for (InfoObj infoObj : newInfoObjList) {
+            infoRepository.save(Info.builder()
+                    .infoKey(infoObj.getInfoKey())
+                    .infoValue(infoObj.getInfoValue())
+                    .person(person)
+                    .build());
+        }
+    }
+
+    private Person loadPersonWithAccessCheck(UserDetails userDetails, Long personId) throws BaseException {
         Person person = personRepository.findById(personId)
                 .orElseThrow(
                         () -> new BaseException(404, "Person not found with that Id")
                 );
 
         // Check if the person belongs to the user
-        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
+        if (person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
             throw new BaseException(403, "Your not allowed to access this person");
         }
 
-        personRepository.toggleFavorite(personId);
-    }
-
-    public void addNewInfo(
-        UserDetails userDetails,
-        Long personId,
-        AddInfoReqDto addInfoReqDto
-    ) throws BaseException {
-        Person person = personRepository.findById(personId)
-            .orElseThrow(
-                () -> new BaseException(404, "Person not found with that Id")
-            );
-
-        // Check if the person belongs to the user
-        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
-            throw new BaseException(403, "Your not allowed to access this person");
-        }
-
-        List<InfoObj> newInfoObjList = addInfoReqDto.getInfo();
-        for (InfoObj infoObj : newInfoObjList) {
-            infoRepository.save(Info.builder()
-                .infoKey(infoObj.getInfoKey())
-                .infoValue(infoObj.getInfoValue())
-                .person(person)
-                .build());
-        }
+        return person;
     }
 }
