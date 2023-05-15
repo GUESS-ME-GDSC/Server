@@ -101,7 +101,7 @@ public class PersonController {
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable("id") Long personId
     ) throws BaseException {
-        personService.toggleFavorite(personId);
+        personService.toggleFavorite(userDetails, personId);
         return new BaseResponse<>(
             201,
             "Update Successfully",
@@ -115,7 +115,7 @@ public class PersonController {
         @PathVariable("id") Long personId,
         @RequestBody AddInfoReqDto addInfoReqDto
     ) throws BaseException {
-        personService.addNewInfo(personId, addInfoReqDto);
+        personService.addNewInfo(userDetails, personId, addInfoReqDto);
         return new BaseResponse<>(
             201,
             "Create Successfully",

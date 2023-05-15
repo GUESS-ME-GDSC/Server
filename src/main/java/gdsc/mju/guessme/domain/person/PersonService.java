@@ -169,18 +169,42 @@ public class PersonService {
     public void deletePerson(
         UserDetails userDetails,
         Long personId
-    ) {
-        infoRepository.deleteAllInBatchByPersonId(personId);
-        personRepository.deleteById(personId);
+    ) throws BaseException {
+        // load person
+        Person person = personRepository.findById(personId)
+            .orElseThrow(
+                () -> new BaseException(404, "Person not found with that Id")
+            );
+
+        // Check if the person belongs to the user
+        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
+            throw new BaseException(403, "Your not allowed to access this person");
+        }
+
+        // Delete person
+        personRepository.delete(person);
     }
 
     public void toggleFavorite(
+        UserDetails userDetails,
         Long personId
-    ) {
+    ) throws BaseException {
+        // load person with child infos if user is owner
+        Person person = personRepository.findById(personId)
+                .orElseThrow(
+                        () -> new BaseException(404, "Person not found with that Id")
+                );
+
+        // Check if the person belongs to the user
+        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
+            throw new BaseException(403, "Your not allowed to access this person");
+        }
+
         personRepository.toggleFavorite(personId);
     }
 
     public void addNewInfo(
+        UserDetails userDetails,
         Long personId,
         AddInfoReqDto addInfoReqDto
     ) throws BaseException {
@@ -188,6 +212,11 @@ public class PersonService {
             .orElseThrow(
                 () -> new BaseException(404, "Person not found with that Id")
             );
+
+        // Check if the person belongs to the user
+        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
+            throw new BaseException(403, "Your not allowed to access this person");
+        }
 
         List<InfoObj> newInfoObjList = addInfoReqDto.getInfo();
         for (InfoObj infoObj : newInfoObjList) {
