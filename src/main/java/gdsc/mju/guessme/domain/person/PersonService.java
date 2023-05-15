@@ -17,7 +17,7 @@ import gdsc.mju.guessme.global.infra.gcs.GcsService;
 import gdsc.mju.guessme.global.response.BaseException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -69,6 +69,7 @@ public class PersonService {
     }
 
     public PersonDetailResDto getPersonDetail(
+        UserDetails userDetails,
         Long personId
     ) throws BaseException {
         Person person = personRepository.findById(personId)
@@ -76,11 +77,18 @@ public class PersonService {
                 () -> new BaseException(404, "Person not found with that Id")
             );
 
+        // Check if the person belongs to the user
+        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
+            throw new BaseException(403, "Your not allowed to access this person");
+        }
+
         List<InfoObj> infoObjList = InfoObj.of(infoRepository.findAllByPerson(person));
+
         return PersonDetailResDto.of(person, infoObjList);
     }
 
     public void updatePerson(
+        UserDetails userDetails,
         Long personId,
         UpdatePersonReqDto updatePersonReqDto
     )
@@ -89,6 +97,11 @@ public class PersonService {
             .orElseThrow(
                 () -> new BaseException(404, "Person not found with that Id")
             );
+
+        // Check if the person belongs to the user
+        if(person.getUser() == null || !person.getUser().getUserId().equals(userDetails.getUsername())) {
+            throw new BaseException(403, "Your not allowed to access this person");
+        }
 
         /**
          * update person entity with new data
@@ -154,6 +167,7 @@ public class PersonService {
     }
 
     public void deletePerson(
+        UserDetails userDetails,
         Long personId
     ) {
         infoRepository.deleteAllInBatchByPersonId(personId);

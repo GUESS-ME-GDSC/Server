@@ -65,7 +65,7 @@ public class PersonController {
         return new BaseResponse<>(
             200,
             "Load Successfully",
-            personService.getPersonDetail(personId)
+            personService.getPersonDetail(userDetails, personId)
         );
     }
 
@@ -75,7 +75,7 @@ public class PersonController {
         @PathVariable("id") Long personId,
         @ModelAttribute UpdatePersonReqDto updatePersonReqDto
     ) throws BaseException, IOException {
-        personService.updatePerson(personId, updatePersonReqDto);
+        personService.updatePerson(userDetails, personId, updatePersonReqDto);
         return new BaseResponse<>(
             201,
             "Update Successfully",
@@ -88,7 +88,7 @@ public class PersonController {
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable("id") Long personId
     ) throws BaseException {
-        personService.deletePerson(personId);
+        personService.deletePerson(userDetails, personId);
         return new BaseResponse<>(
             200,
             "Delete Successfully",

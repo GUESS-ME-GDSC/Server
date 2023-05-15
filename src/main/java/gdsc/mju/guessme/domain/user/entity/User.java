@@ -2,6 +2,7 @@ package gdsc.mju.guessme.domain.user.entity;
 
 import javax.persistence.*;
 
+import gdsc.mju.guessme.domain.person.entity.Person;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +13,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -34,9 +36,12 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String userPassword;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Person> personList;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
-    private List<String> roles = new ArrayList<>();
+    private Set<String> roles = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
