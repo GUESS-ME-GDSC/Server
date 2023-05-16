@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {
     List<Person> findByFavoriteAndUser_UserId(boolean favorite, String userId);
@@ -18,7 +19,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("update Person p set p.score=:score where p.id=:personId")
-    void updateScore(Long personId, Long score);
+    void updateScore(@Param("personId") Long personId, @Param("score") Long score);
 
     @Modifying
     @Transactional
