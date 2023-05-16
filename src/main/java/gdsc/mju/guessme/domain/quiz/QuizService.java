@@ -12,6 +12,8 @@ import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
 import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
 import gdsc.mju.guessme.global.infra.gcs.GcsService;
+import gdsc.mju.guessme.global.infra.openai.OpenAIService;
+import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
@@ -25,6 +27,7 @@ public class QuizService {
     private final UserRepository userRepository;
     private final PersonRepository personRepository;
     private final GcsService gcsService;
+    private final OpenAIService openAIService;
 
 
     public QuizResDto createQuiz(String username, long personId) {
@@ -165,7 +168,7 @@ public class QuizService {
     }
 
 
-    public String findOverlap(String str1, String str2) {
+     private String findOverlap(String str1, String str2) {
         // 더 긴 문자열 str1로 설정
         if (str1.length() < str2.length()) {
             String temp = str1;
@@ -187,5 +190,76 @@ public class QuizService {
         }
 
         return null; // 겹치는 단어가 없을 경우 null 반환
+    }
+
+    private Boolean scoringBirthWithChatGpt(
+            String textFromImage, String answer
+    ) throws BaseException {
+        String prompt = String.format(
+                "The question I just asked was about guessing a birthday, and the correct answer is %s." +
+                "The format of the answer is free because the elderly with dementia are the submitters." +
+                "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
+                answer, textFromImage
+        );
+
+        // return true or false
+        return processResponse(this.openAIService.createCompletion(prompt));
+    }
+
+    private Boolean scoringRelationWithChatGpt(
+            String textFromImage, String answer
+    ) throws BaseException {
+        String prompt = String.format(
+                "The question I just asked was about guessing a relationship, and the correct answer is %s." +
+                "The format of the answer is free because the elderly with dementia are the submitters." +
+                "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
+                answer, textFromImage
+        );
+
+        // return true or false
+        return processResponse(this.openAIService.createCompletion(prompt));
+    }
+
+    private Boolean scoringResidenceWithChatGpt(
+            String textFromImage, String answer
+    ) throws BaseException {
+        String prompt = String.format(
+                "The question I just asked was about guessing a residence, and the correct answer is %s." +
+                "The format of the answer is free because the elderly with dementia are the submitters." +
+                "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
+                answer, textFromImage
+        );
+
+        // return true or false
+        return processResponse(this.openAIService.createCompletion(prompt));
+    }
+
+    private Boolean scoringInfoWithChatGpt(
+            String textFromImage, String question, String answer
+    ) throws BaseException {
+        String prompt = String.format(
+                "The question I just asked was about guessing %s, and the correct answer is %s." +
+                "The format of the answer is free because the elderly with dementia are the submitters." +
+                "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
+                question, answer, textFromImage
+        );
+
+        // return true or false
+        return processResponse(this.openAIService.createCompletion(prompt));
+    }
+
+    private Boolean processResponse(String response) {
+        // Check if the response contains "yes"
+        if (response.contains("yes")) {
+            return true;
+        }
+
+        // Check if the response contains "no"
+        if (response.contains("no")) {
+            return false;
+        }
+
+        // If neither "yes" nor "no" is found, return false as the default value
+        return false;
     }
 }
