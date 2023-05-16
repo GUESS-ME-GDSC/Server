@@ -3,6 +3,7 @@ package gdsc.mju.guessme.global.infra.openai;
 import gdsc.mju.guessme.global.infra.openai.dto.ChatRequest;
 import gdsc.mju.guessme.global.infra.openai.dto.ChatResponse;
 import gdsc.mju.guessme.global.infra.openai.dto.Message;
+import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,7 +27,7 @@ public class OpenAIServiceImpl implements OpenAIService {
     private String apiUrl;
 
     @Override
-    public ChatResponse createCompletion(String prompt) {
+    public String createCompletion(String prompt) throws BaseException {
         // create a request
         List<Message> messages = List.of(
                 new Message(prompt)
@@ -34,6 +35,12 @@ public class OpenAIServiceImpl implements OpenAIService {
         ChatRequest request = new ChatRequest(model, messages, 0.9);
 
         // call the API
-        return restTemplate.postForObject(apiUrl, request, ChatResponse.class);
+        ChatResponse chatResponse = restTemplate.postForObject(apiUrl, request, ChatResponse.class);
+        if(chatResponse == null) {
+            throw new BaseException(500, "OpenAI API call failed");
+        }
+
+        // return the response
+        return chatResponse.getChoices().get(0).getMessage().getContent();
     }
 }

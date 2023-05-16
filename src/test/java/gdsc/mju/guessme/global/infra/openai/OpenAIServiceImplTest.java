@@ -1,6 +1,6 @@
 package gdsc.mju.guessme.global.infra.openai;
 
-import gdsc.mju.guessme.global.infra.openai.dto.ChatResponse;
+import gdsc.mju.guessme.global.response.BaseException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,12 +13,12 @@ class OpenAIServiceImplTest {
     private OpenAIService openAIService;
 
     @Test
-    void createCompletion() {
+    void createCompletion() throws BaseException {
         String prompt = "Say Hi";
-        ChatResponse result = openAIService.createCompletion(prompt);
+        String result = openAIService.createCompletion(prompt);
         System.out.println(result);
 
         // check if is existed
-        assertNotNull(result.getChoices().get(0).getMessage().getContent());
+        assertNotNull(result);
     }
 }
