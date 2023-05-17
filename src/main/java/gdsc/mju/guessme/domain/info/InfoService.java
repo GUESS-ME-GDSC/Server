@@ -1,6 +1,8 @@
 package gdsc.mju.guessme.domain.info;
 
+import gdsc.mju.guessme.domain.info.entity.Info;
 import gdsc.mju.guessme.domain.person.entity.Person;
+import gdsc.mju.guessme.domain.person.repository.PersonRepository;
 import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
 import gdsc.mju.guessme.global.response.BaseException;
@@ -11,7 +13,6 @@ import gdsc.mju.guessme.domain.info.repository.InfoRepository;
 import gdsc.mju.guessme.domain.info.dto.DeleteInfoByIdListReqDto;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -32,18 +33,18 @@ public class InfoService {
         // dto에서 infoIdList 추출
         List<Long> infoIds = deleteInfoByIdListReqDto.getIdList();
 
-        // user의 personList에서 infoIdList에 해당하는 info가 있는 첫번째 person 추출
-        Optional<Person> targetPerson = user.getPersonList().stream()
-                .filter(person -> person.getInfoList().stream()
-                        .anyMatch(info -> infoIds.contains(info.getId())))
-                .findFirst();
+        Person targetPerson = infoRepository.findAllByIdIn(infoIds)
+                .filter(infos -> infos.size() == infoIds.size()) // infoIds에 해당하는 모든 Info가 존재하는지 확인
+                .flatMap(infos -> infos.stream().findFirst()) // 첫 번째 Info
+                .map(Info::getPerson) // Person 추출
+                .orElseThrow(() -> new BaseException(404, "Info not found"));
 
-        // personId 추출
-        Long personId = targetPerson.orElseThrow(
-                () -> new BaseException(404, "Person not found")
-        ).getId();
+        // check if targetPerson is allowed to be controlled by user
+        if (!user.getPersonList().contains(targetPerson)) {
+            throw new BaseException(403, "You are not allowed to control this person");
+        }
 
         // personId와 infoIdList로 info 삭제
-        infoRepository.deleteInfoByPersonIdAndInfoIds(personId, infoIds);
+        infoRepository.deleteInfoByPersonIdAndInfoIds(targetPerson.getId(), infoIds);
     }
 }

@@ -4,6 +4,8 @@ import gdsc.mju.guessme.domain.info.entity.Info;
 import gdsc.mju.guessme.domain.person.entity.Person;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +27,6 @@ public interface InfoRepository extends JpaRepository<Info, Long> {
 
     @Transactional
     void deleteAllInBatchByPersonId(Long personId);
+
+    Optional<Set<Info>> findAllByIdIn(List<Long> infoIds);
 }
