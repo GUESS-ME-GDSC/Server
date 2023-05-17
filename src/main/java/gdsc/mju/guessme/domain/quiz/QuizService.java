@@ -240,6 +240,60 @@ public class QuizService {
         }
     }
 
+    @Transactional
+    public Boolean scoringMethodForTest(
+            String username,
+            String infoKey,
+            String infoValue,
+            Long personId,
+            String textFromImage
+    ) throws IOException, BaseException {
+
+        User user = userRepository.findByUserId(username)
+                .orElseThrow(() -> new BaseException(404, "User not found"));
+
+        // chat gpt를 통해 채점
+        Boolean correct = scoringWithChatGpt(textFromImage, infoKey, infoValue);
+
+        // personId로 person 찾기
+        Person person = personRepository.findById(personId)
+                .orElseThrow(() -> new BaseException(404, "Person not found"));
+
+        Scoring scoring = scoringRepository.findByQuestionAndPerson(infoKey, person);
+
+        if (correct) { // 맞았을 경우
+            // 테이블에 있는지 조회
+            if (scoring != null) {
+                // 있으면 flag = 0으로 삽입
+                scoring.setWrongFlag(0L);
+            } else {
+                // 없으면 새로 삽입
+                scoringRepository.save(Scoring.builder()
+                        .question(infoKey)
+                        .wrongFlag(0L)
+                        .person(person)
+                        .build());
+            }
+            return Boolean.TRUE;
+        } else { // 틀렸을 경우
+            // 테이블에 있는지 조회
+            if (scoring != null) {
+                // 있으면 flag 증가
+                long flag = scoring.getWrongFlag() + 1;
+                // if flag == 3 -> 행 지우고 메일 보내기
+                if (flag == 3) {
+                    scoringRepository.deleteByQuestionAndPerson(infoKey, person);
+                    // 메일 보내기
+                    sendEmail(user);
+                } else {
+                    scoring.setWrongFlag(flag);
+                }
+            }
+
+            return Boolean.FALSE;
+        }
+    }
+
     /**
      * 메일 전송
      * @param user
@@ -264,6 +318,33 @@ public class QuizService {
         });
     }
 
+    public void sendEmailForTest(String email) {
+        System.out.println("hi in sendEmailForTest");
+        executorService.submit(() -> {
+            System.out.println("email = " + email);
+            MimeMessage message = javaMailSender.createMimeMessage();
+            try {
+                System.out.println("1");
+                // 1. 메일 제목 설정
+                message.setSubject("Guess me! : check on your loved one!");
+
+                System.out.println("2");
+                // 2. 메일 수신자 설정
+                message.addRecipients(MimeMessage.RecipientType.TO, email);
+
+                System.out.println("3");
+                // 3. 메일 내용 설정
+                Context context = new Context();
+                message.setText(templateEngine.process("mail", context), "utf-8", "html");
+
+                System.out.println("4");
+                javaMailSender.send(message);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to send email", e);
+            }
+        });
+    }
+
     /**
      * chat gpt를 통해 채점
      * @param textFromImage
@@ -274,18 +355,25 @@ public class QuizService {
      */
     private Boolean scoringWithChatGpt(String textFromImage, String question, String answer) throws BaseException {
         String prompt = String.format(
-                "The question I just asked was about guessing %s, and the correct answer is %s." +
+                "You are a scoring machine now. You can only say yes or no. Here is the situation. " +
+                        "I asked an old man a question about guessing %s, and the correct answer is \"%s\"." +
                         "The format of the answer is free because the elderly with dementia are the submitters." +
-                        "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
+                        "He submitted \"%s\". If it is correct, please say \"yes,\" otherwise say \"no.\"",
                 question, answer, textFromImage
         );
 
+        System.out.println("prompt = " + prompt);
         // return true or false
         return processResponse(this.openAIService.createCompletion(prompt));
     }
 
     private Boolean processResponse(String response) {
         // Check if the response contains "yes"
+        System.out.println("response = " + response);
+
+        // make response lowercase
+        response = response.toLowerCase();
+
         if (response.contains("yes")) {
             return true;
         }
