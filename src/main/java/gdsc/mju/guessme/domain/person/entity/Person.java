@@ -1,17 +1,12 @@
 package gdsc.mju.guessme.domain.person.entity;
 
+import gdsc.mju.guessme.domain.info.entity.Info;
 import gdsc.mju.guessme.domain.person.dto.UpdatePersonDto;
-import gdsc.mju.guessme.domain.person.dto.UpdatePersonReqDto;
 import gdsc.mju.guessme.domain.user.entity.User;
 import java.time.LocalDate;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
+import java.util.Set;
+import javax.persistence.*;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,6 +50,9 @@ public class Person {
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+    private Set<Info> infoList;
 
     @Builder
     public Person(String name, String relation, LocalDate birth, String residence, String image, String voice, Long score, Boolean favorite, User user) {

@@ -2,8 +2,12 @@ package gdsc.mju.guessme.domain.info.repository;
 
 import gdsc.mju.guessme.domain.info.entity.Info;
 import gdsc.mju.guessme.domain.person.entity.Person;
+
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,9 +19,14 @@ public interface InfoRepository extends JpaRepository<Info, Long> {
 
     @Transactional
     @Modifying
-    @Query("DELETE FROM Info e WHERE e.id IN :ids")
-    void deleteByIdIn(@Param("ids") List<Long> ids);
+    @Query("DELETE FROM Info e WHERE e.person.id = :personId AND e.id IN :ids")
+    void deleteInfoByPersonIdAndInfoIds(
+            @Param("personId") Long personId,
+            @Param("ids") List<Long> ids
+    );
 
     @Transactional
     void deleteAllInBatchByPersonId(Long personId);
+
+    Optional<Set<Info>> findAllByIdIn(List<Long> infoIds);
 }
