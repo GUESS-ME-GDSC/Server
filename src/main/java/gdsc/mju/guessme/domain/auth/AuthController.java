@@ -29,7 +29,6 @@ public class AuthController {
     @PostMapping("/login")
     public BaseResponse<String> login(@RequestBody AuthReqDto loginReq) throws BaseException {
         String t = authService.login(loginReq);
-        System.out.println("t = " + t);
         return new BaseResponse<>(
             201,
             "Login Successfully",

@@ -23,7 +23,7 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() throws BaseException {
         if(userRepository.findByUserId("AuthServiceTest").isEmpty()) {
-            AuthReqDto joinReq = new AuthReqDto("AuthServiceTest", "test");
+            AuthReqDto joinReq = new AuthReqDto("AuthServiceTest", "test", "testEmail@email.com");
             authService.join(joinReq);
         }
     }
@@ -43,7 +43,7 @@ class AuthServiceTest {
     @Transactional
     void login() throws BaseException {
         // given
-        AuthReqDto loginReq = new AuthReqDto("AuthServiceTest", "test");
+        AuthReqDto loginReq = new AuthReqDto("AuthServiceTest", "test", "testEmail");
 
         // when
         String result = authService.login(loginReq);

@@ -10,7 +10,6 @@ public class DeleteInfoByIdListReqDto {
     private List<Long> idList;
 
     public DeleteInfoByIdListReqDto(List<Long> idList) {
-        System.out.println(idList);
         this.idList = idList;
     }
 
