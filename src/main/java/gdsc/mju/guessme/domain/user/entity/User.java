@@ -3,7 +3,6 @@ package gdsc.mju.guessme.domain.user.entity;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 
-import gdsc.mju.guessme.domain.person.entity.Person;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,13 +10,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
+import gdsc.mju.guessme.domain.person.entity.Person;
 
 @Getter
 @Entity
