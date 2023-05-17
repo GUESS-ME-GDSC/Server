@@ -9,24 +9,16 @@ import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
 import gdsc.mju.guessme.domain.quiz.dto.QuizDto;
 import gdsc.mju.guessme.domain.quiz.dto.QuizResDto;
 import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
-import gdsc.mju.guessme.domain.quiz.entity.Scoring;
-import gdsc.mju.guessme.domain.quiz.repository.ScoringRepository;
 import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
 import gdsc.mju.guessme.global.infra.gcs.GcsService;
+import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.spring5.SpringTemplateEngine;
-
-import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +27,6 @@ public class QuizService {
     private final UserRepository userRepository;
     private final PersonRepository personRepository;
     private final GcsService gcsService;
-    private final JavaMailSender javaMailSender;
-    private final SpringTemplateEngine templateEngine;
-    private final ScoringRepository scoringRepository;
 
 
     public QuizResDto createQuiz(String username, long personId) {
@@ -112,9 +101,23 @@ public class QuizService {
                 .quizList(quizDtoList)
                 .build();
     }
+
     // 새 점수 등록
-    public Long newscore(NewScoreDto newScoreDto) {
-        personRepository.updateScore(newScoreDto.getPersonId(), newScoreDto.getScore());
+    public Long newscore(
+        UserDetails userDetails,
+        NewScoreDto newScoreDto
+    ) throws BaseException {
+        // load user
+        User user = userRepository.findByUserId(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // personId가 해당 user의 personList에 있는지 확인
+        Long validPersonId = user.getPersonList().stream()
+                .filter(person -> person.getId().equals(newScoreDto.getPersonId()))
+                .findFirst()
+                .orElseThrow(() -> new BaseException(403, "Your not allowed to access this person")).getId();
+
+        personRepository.updateScore(validPersonId, newScoreDto.getScore());
         return newScoreDto.getScore();
     }
 
@@ -152,100 +155,26 @@ public class QuizService {
         }
     }
 
-    // 문제 채점 / 메일 전송
-    // 이미지 포함한 메일
-    // 메일 보내는거 오래 걸려서 @Async 적용
-    // 점수 저장은 잘 되는데 반환값에 null 나옴. 왜?
-    // 비동기처리 안하면 엄청 느림
-    static ExecutorService executorService = Executors.newFixedThreadPool(5);
-
-    @Transactional
-    public Boolean scoring(String username, ScoreReqDto dto) throws IOException {
-
-        User user = userRepository.findByUserId(username)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    public Boolean scoring(ScoreReqDto dto) throws IOException {
 
         String infoValue = dto.getInfoValue(); // 클라에서 갖고 있는 정답
-        Long infoId = dto.getInfoId();
 
         String imageUrl = dto.getImage() != null ?
                 gcsService.uploadFile(dto.getImage()) : null;
 
+
         String textFromImage = detectText(imageUrl); // 이미지 추출 텍스트
 
         // 한글로만 입력 받는다고 가정, 두 글자 이상 연속으로 중복되는 경우 정답 처리
-        // 이 코드는 gpt로 변경
         String overlap = findOverlap(infoValue, textFromImage);
+
         // 채점 후 삭제하기
         String fileUUID = imageUrl.split("/")[4];
         gcsService.deleteFile(fileUUID);
 
-        Scoring scoring = scoringRepository.findByInfoId(infoId);
-
-        if (overlap != null) { // 맞았을 경우
-            // 테이블에 있는지 조회
-            if (scoringRepository.existsByInfoId(infoId)) {
-                scoring.setWrongFlag(0L);
-            } else {
-                Person person = personRepository.findById(dto.getPersonId())
-                        .orElseThrow();
-
-                // 없으면 테이블 삽입
-                scoringRepository.save(Scoring.builder()
-                        .infoId(infoId)
-                        .wrongFlag(0L)
-                        .person(person)
-                        .build());
-            }
+        if (overlap != null) {
             return Boolean.TRUE;
-        } else { // 틀렸을 경우
-            // 테이블에 있는지 조회
-            if (scoringRepository.existsByInfoId(infoId)) {
-                // 있으면 flag++
-                Long flag = scoring.getWrongFlag() + 1;
-                // if flag == 3 -> 행 지우고 메일 보내기
-                if (flag == 3) {
-                    scoringRepository.deleteByInfoId(infoId);
-                    // 메일 보내기
-                    executorService.submit(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            MimeMessage message = javaMailSender.createMimeMessage();
-                            try {
-//                                MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
-
-                                // 1. 메일 제목 설정
-                                message.setSubject("Guess me! : check on your loved one!");
-
-
-                                // 2. 메일 수신자 설정
-                                String receiver = user.getEmail();
-//                                messageHelper.setTo(receiver);
-                                message.addRecipients(MimeMessage.RecipientType.TO, receiver);
-
-                                // 3. 메일 내용 설정
-//                                messageHelper.setText("The quiz score is too low recently, we recommend you to check on your loved one.");
-                                Context context = new Context();
-                                message.setText(templateEngine.process("mail", context), "utf-8", "html");
-//                                messageHelper.addInline("image1", new ClassPathResource("templates/family.jpg"));
-
-
-                                // 4. 메일 전송
-                                javaMailSender.send(message);
-                            } catch (Exception e) {
-                                System.out.println("error : " + e.toString());
-                            }
-                        }
-                    });
-                } else {
-                    scoring.setWrongFlag(flag);
-                }
-
-            } else {
-                // 없으면 continue
-            }
-
+        } else {
             return Boolean.FALSE;
         }
     }

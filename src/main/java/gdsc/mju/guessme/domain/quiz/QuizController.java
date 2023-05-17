@@ -26,11 +26,10 @@ public class QuizController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable long personId
     ) throws BaseException {
-        String username = userDetails.getUsername();
         return new BaseResponse<>(
                 200,
                 "Load Successfully",
-                quizService.createQuiz(username, personId)
+                quizService.createQuiz(userDetails.getUsername(), personId)
         );
     }
 
@@ -43,7 +42,7 @@ public class QuizController {
         return new BaseResponse<>(
                 200,
                 "Load Successfully",
-                quizService.newscore(newScoreDto)
+                quizService.newscore(userDetails, newScoreDto)
         );
     }
 
