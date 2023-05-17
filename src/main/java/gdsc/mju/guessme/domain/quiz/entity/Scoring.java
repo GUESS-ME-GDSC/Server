@@ -18,12 +18,8 @@ public class Scoring {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    // 'key'는 mysql의 예약어이므로 쓰면 에러.
     @Column(nullable = false)
-    private Long infoId;
-//    @ManyToOne
-//    @JoinColumn(name = "info_id")
-//    private Info info;
+    private String question;
 
     @Column(nullable = false)
     private Long wrongFlag;
@@ -33,8 +29,8 @@ public class Scoring {
     private Person person;
 
     @Builder
-    public Scoring(Long infoId, Long wrongFlag, Person person) {
-        this.infoId = infoId;
+    public Scoring(String question, Long wrongFlag, Person person) {
+        this.question = question;
         this.wrongFlag = wrongFlag;
         this.person = person;
     }
