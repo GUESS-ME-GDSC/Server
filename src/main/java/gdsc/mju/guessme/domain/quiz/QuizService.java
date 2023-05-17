@@ -177,39 +177,45 @@ public class QuizService {
     static ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     @Transactional
-    public Boolean scoring(String username, ScoreReqDto dto) throws IOException {
+    public Boolean scoring(
+            String username,
+            ScoreReqDto dto
+    ) throws IOException, BaseException {
 
         User user = userRepository.findByUserId(username)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new BaseException(404, "User not found"));
 
-        String infoValue = dto.getInfoValue(); // 클라에서 갖고 있는 정답
-        Long infoId = dto.getInfoId();
+        String infoKey = dto.getInfoKey(); // 문제
+        String infoValue = dto.getInfoValue(); // 정답
 
         String imageUrl = dto.getImage() != null ?
                 gcsService.uploadFile(dto.getImage()) : null;
 
         String textFromImage = detectText(imageUrl); // 이미지 추출 텍스트
 
-        // 한글로만 입력 받는다고 가정, 두 글자 이상 연속으로 중복되는 경우 정답 처리
-        // 이 코드는 gpt로 변경
-        String overlap = findOverlap(infoValue, textFromImage);
-        // 채점 후 삭제하기
-        String fileUUID = imageUrl.split("/")[4];
-        gcsService.deleteFile(fileUUID);
+        // chat gpt를 통해 채점
+        Boolean correct = scoringWithChatGpt(textFromImage, infoKey, infoValue);
+        // 채점 후 이미지 삭제
+        if (imageUrl != null) {
+            String fileUUID = imageUrl.split("/")[4];
+            gcsService.deleteFile(fileUUID);
+        }
 
-        Scoring scoring = scoringRepository.findByInfoId(infoId);
+        // personId로 person 찾기
+        Person person = personRepository.findById(dto.getPersonId())
+                .orElseThrow(() -> new BaseException(404, "Person not found"));
 
-        if (overlap != null) { // 맞았을 경우
+        Scoring scoring = scoringRepository.findByQuestionAndPerson(infoKey, person);
+
+        if (correct) { // 맞았을 경우
             // 테이블에 있는지 조회
-            if (scoringRepository.existsByInfoId(infoId)) {
+            if (scoring != null) {
+                // 있으면 flag = 0으로 삽입
                 scoring.setWrongFlag(0L);
             } else {
-                Person person = personRepository.findById(dto.getPersonId())
-                        .orElseThrow();
-
-                // 없으면 테이블 삽입
+                // 없으면 새로 삽입
                 scoringRepository.save(Scoring.builder()
-                        .infoId(infoId)
+                        .question(infoKey)
                         .wrongFlag(0L)
                         .person(person)
                         .build());
@@ -217,130 +223,60 @@ public class QuizService {
             return Boolean.TRUE;
         } else { // 틀렸을 경우
             // 테이블에 있는지 조회
-            if (scoringRepository.existsByInfoId(infoId)) {
-                // 있으면 flag++
-                Long flag = scoring.getWrongFlag() + 1;
+            if (scoring != null) {
+                // 있으면 flag 증가
+                long flag = scoring.getWrongFlag() + 1;
                 // if flag == 3 -> 행 지우고 메일 보내기
                 if (flag == 3) {
-                    scoringRepository.deleteByInfoId(infoId);
+                    scoringRepository.deleteByQuestionAndPerson(infoKey, person);
                     // 메일 보내기
-                    executorService.submit(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            MimeMessage message = javaMailSender.createMimeMessage();
-                            try {
-//                                MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
-
-                                // 1. 메일 제목 설정
-                                message.setSubject("Guess me! : check on your loved one!");
-
-
-                                // 2. 메일 수신자 설정
-                                String receiver = user.getEmail();
-//                                messageHelper.setTo(receiver);
-                                message.addRecipients(MimeMessage.RecipientType.TO, receiver);
-
-                                // 3. 메일 내용 설정
-//                                messageHelper.setText("The quiz score is too low recently, we recommend you to check on your loved one.");
-                                Context context = new Context();
-                                message.setText(templateEngine.process("mail", context), "utf-8", "html");
-//                                messageHelper.addInline("image1", new ClassPathResource("templates/family.jpg"));
-
-
-                                // 4. 메일 전송
-                                javaMailSender.send(message);
-                            } catch (Exception e) {
-                                System.out.println("error : " + e.toString());
-                            }
-                        }
-                    });
+                    sendEmail(user);
                 } else {
                     scoring.setWrongFlag(flag);
                 }
-
-            } else {
-                // 없으면 continue
             }
 
             return Boolean.FALSE;
         }
     }
 
+    /**
+     * 메일 전송
+     * @param user
+     */
+    private void sendEmail(User user) {
+        executorService.submit(() -> {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            try {
+                // 1. 메일 제목 설정
+                message.setSubject("Guess me! : check on your loved one!");
+                // 2. 메일 수신자 설정
+                message.addRecipients(MimeMessage.RecipientType.TO, user.getEmail());
 
-     private String findOverlap(String str1, String str2) {
-        // 더 긴 문자열 str1로 설정
-        if (str1.length() < str2.length()) {
-            String temp = str1;
-            str1 = str2;
-            str2 = temp;
-        }
+                // 3. 메일 내용 설정
+                Context context = new Context();
+                message.setText(templateEngine.process("mail", context), "utf-8", "html");
 
-        // 더 긴 문자열을 기준으로 루프를 돌면서 서브스트링을 만들어 비교
-        for (int i = str2.length(); i > 0; i--) {
-            for (int j = 0; j <= str2.length() - i; j++) {
-                if (str1.contains(str2.substring(j, j + i))) {
-                    String ans = str2.substring(j, j + i);
-                    if (ans.length() >= 2) {
-                        return ans;
-                    }
-                    return null;
-                }
+                javaMailSender.send(message);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to send email", e);
             }
-        }
-
-        return null; // 겹치는 단어가 없을 경우 null 반환
+        });
     }
 
-    private Boolean scoringBirthWithChatGpt(
-            String textFromImage, String answer
-    ) throws BaseException {
-        String prompt = String.format(
-                "The question I just asked was about guessing a birthday, and the correct answer is %s." +
-                "The format of the answer is free because the elderly with dementia are the submitters." +
-                "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
-                answer, textFromImage
-        );
-
-        // return true or false
-        return processResponse(this.openAIService.createCompletion(prompt));
-    }
-
-    private Boolean scoringRelationWithChatGpt(
-            String textFromImage, String answer
-    ) throws BaseException {
-        String prompt = String.format(
-                "The question I just asked was about guessing a relationship, and the correct answer is %s." +
-                "The format of the answer is free because the elderly with dementia are the submitters." +
-                "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
-                answer, textFromImage
-        );
-
-        // return true or false
-        return processResponse(this.openAIService.createCompletion(prompt));
-    }
-
-    private Boolean scoringResidenceWithChatGpt(
-            String textFromImage, String answer
-    ) throws BaseException {
-        String prompt = String.format(
-                "The question I just asked was about guessing a residence, and the correct answer is %s." +
-                "The format of the answer is free because the elderly with dementia are the submitters." +
-                "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
-                answer, textFromImage
-        );
-
-        // return true or false
-        return processResponse(this.openAIService.createCompletion(prompt));
-    }
-
-    private Boolean scoringInfoWithChatGpt(
-            String textFromImage, String question, String answer
-    ) throws BaseException {
+    /**
+     * chat gpt를 통해 채점
+     * @param textFromImage
+     * @param question
+     * @param answer
+     * @return true or false
+     * @throws BaseException
+     */
+    private Boolean scoringWithChatGpt(String textFromImage, String question, String answer) throws BaseException {
         String prompt = String.format(
                 "The question I just asked was about guessing %s, and the correct answer is %s." +
-                "The format of the answer is free because the elderly with dementia are the submitters." +
-                "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
+                        "The format of the answer is free because the elderly with dementia are the submitters." +
+                        "He submitted \"%s\" If it is correct, please say \"yes,\" otherwise say \"no.\"",
                 question, answer, textFromImage
         );
 
