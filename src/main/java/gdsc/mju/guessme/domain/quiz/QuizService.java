@@ -12,7 +12,9 @@ import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
 import gdsc.mju.guessme.domain.user.entity.User;
 import gdsc.mju.guessme.domain.user.repository.UserRepository;
 import gdsc.mju.guessme.global.infra.gcs.GcsService;
+import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
@@ -101,8 +103,21 @@ public class QuizService {
     }
 
     // 새 점수 등록
-    public Long newscore(NewScoreDto newScoreDto) {
-        personRepository.updateScore(newScoreDto.getPersonId(), newScoreDto.getScore());
+    public Long newscore(
+        UserDetails userDetails,
+        NewScoreDto newScoreDto
+    ) throws BaseException {
+        // load user
+        User user = userRepository.findByUserId(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // personId가 해당 user의 personList에 있는지 확인
+        Long validPersonId = user.getPersonList().stream()
+                .filter(person -> person.getId().equals(newScoreDto.getPersonId()))
+                .findFirst()
+                .orElseThrow(() -> new BaseException(403, "Your not allowed to access this person")).getId();
+
+        personRepository.updateScore(validPersonId, newScoreDto.getScore());
         return newScoreDto.getScore();
     }
 
