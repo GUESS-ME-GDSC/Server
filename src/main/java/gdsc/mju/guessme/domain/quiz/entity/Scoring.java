@@ -1,5 +1,6 @@
 package gdsc.mju.guessme.domain.quiz.entity;
 
+import gdsc.mju.guessme.domain.info.entity.Info;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,12 +19,9 @@ public class Scoring {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    // 'key'는 mysql의 예약어이므로 쓰면 에러.
-    @Column(nullable = false)
-    private Long infoId;
-//    @ManyToOne
-//    @JoinColumn(name = "info_id")
-//    private Info info;
+    @ManyToOne
+    @JoinColumn(name = "info_id")
+    private Info info;
 
     @Column(nullable = false)
     private Long wrongFlag;
@@ -33,8 +31,8 @@ public class Scoring {
     private Person person;
 
     @Builder
-    public Scoring(Long infoId, Long wrongFlag, Person person) {
-        this.infoId = infoId;
+    public Scoring(Info info, Long wrongFlag, Person person) {
+        this.info = info;
         this.wrongFlag = wrongFlag;
         this.person = person;
     }
