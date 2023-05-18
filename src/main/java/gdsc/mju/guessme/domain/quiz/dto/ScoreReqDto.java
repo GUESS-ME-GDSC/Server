@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @ToString
 public class ScoreReqDto {
-    private Long infoId;
     private String infoKey;
     private String infoValue;
     private Long personId;

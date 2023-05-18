@@ -19,9 +19,8 @@ public class Scoring {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "info_id")
-    private Info info;
+    @Column(nullable = false)
+    private String question;
 
     @Column(nullable = false)
     private Long wrongFlag;
@@ -31,8 +30,8 @@ public class Scoring {
     private Person person;
 
     @Builder
-    public Scoring(Info info, Long wrongFlag, Person person) {
-        this.info = info;
+    public Scoring(String question, Long wrongFlag, Person person) {
+        this.question = question;
         this.wrongFlag = wrongFlag;
         this.person = person;
     }

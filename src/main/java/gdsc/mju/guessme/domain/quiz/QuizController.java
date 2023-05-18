@@ -55,7 +55,7 @@ public class QuizController {
     public BaseResponse<Boolean> scoring(
             @AuthenticationPrincipal UserDetails userDetails,
             @ModelAttribute ScoreReqDto dto // requestBody 대신 @ModelAttribute??
-    ) throws IOException {
+    ) throws IOException, BaseException {
         String username = userDetails.getUsername();
         // dto에 인물id, 인포키, 파일 주소 넣어서 전달
         return new BaseResponse<>(
