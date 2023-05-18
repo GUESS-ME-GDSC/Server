@@ -240,60 +240,6 @@ public class QuizService {
         }
     }
 
-    @Transactional
-    public Boolean scoringMethodForTest(
-            String username,
-            String infoKey,
-            String infoValue,
-            Long personId,
-            String textFromImage
-    ) throws IOException, BaseException {
-
-        User user = userRepository.findByUserId(username)
-                .orElseThrow(() -> new BaseException(404, "User not found"));
-
-        // chat gpt를 통해 채점
-        Boolean correct = scoringWithChatGpt(textFromImage, infoKey, infoValue);
-
-        // personId로 person 찾기
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new BaseException(404, "Person not found"));
-
-        Scoring scoring = scoringRepository.findByQuestionAndPerson(infoKey, person);
-
-        if (correct) { // 맞았을 경우
-            // 테이블에 있는지 조회
-            if (scoring != null) {
-                // 있으면 flag = 0으로 삽입
-                scoring.setWrongFlag(0L);
-            } else {
-                // 없으면 새로 삽입
-                scoringRepository.save(Scoring.builder()
-                        .question(infoKey)
-                        .wrongFlag(0L)
-                        .person(person)
-                        .build());
-            }
-            return Boolean.TRUE;
-        } else { // 틀렸을 경우
-            // 테이블에 있는지 조회
-            if (scoring != null) {
-                // 있으면 flag 증가
-                long flag = scoring.getWrongFlag() + 1;
-                // if flag == 3 -> 행 지우고 메일 보내기
-                if (flag == 3) {
-                    scoringRepository.deleteByQuestionAndPerson(infoKey, person);
-                    // 메일 보내기
-                    sendEmail(user);
-                } else {
-                    scoring.setWrongFlag(flag);
-                }
-            }
-
-            return Boolean.FALSE;
-        }
-    }
-
     /**
      * 메일 전송
      * @param user
@@ -311,33 +257,6 @@ public class QuizService {
                 Context context = new Context();
                 message.setText(templateEngine.process("mail", context), "utf-8", "html");
 
-                javaMailSender.send(message);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to send email", e);
-            }
-        });
-    }
-
-    public void sendEmailForTest(String email) {
-        System.out.println("hi in sendEmailForTest");
-        executorService.submit(() -> {
-            System.out.println("email = " + email);
-            MimeMessage message = javaMailSender.createMimeMessage();
-            try {
-                System.out.println("1");
-                // 1. 메일 제목 설정
-                message.setSubject("Guess me! : check on your loved one!");
-
-                System.out.println("2");
-                // 2. 메일 수신자 설정
-                message.addRecipients(MimeMessage.RecipientType.TO, email);
-
-                System.out.println("3");
-                // 3. 메일 내용 설정
-                Context context = new Context();
-                message.setText(templateEngine.process("mail", context), "utf-8", "html");
-
-                System.out.println("4");
                 javaMailSender.send(message);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to send email", e);

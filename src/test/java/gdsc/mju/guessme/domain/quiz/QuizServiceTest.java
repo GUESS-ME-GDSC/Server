@@ -15,21 +15,21 @@ class QuizServiceTest {
     @Autowired
     private QuizService quizService;
 
-    @Test
-    void scoringMethodForTest() throws BaseException, IOException {
-        String username = "hou27";
-        String infoKey = "name";
-        String infoValue = "newname";
-        Long personId = 1L;
-        String textFromImage = "newname";
-
-        Boolean result = quizService.scoringMethodForTest(username, infoKey, infoValue, personId, textFromImage);
-
-        assertEquals(true, result);
-    }
-
-    @Test
-    void sendEmailForTest() {
-        quizService.sendEmailForTest("ataj125@gmail.com");
-    }
+//    @Test
+//    void scoringMethodForTest() throws BaseException, IOException {
+//        String username = "hou27";
+//        String infoKey = "name";
+//        String infoValue = "newname";
+//        Long personId = 1L;
+//        String textFromImage = "newname";
+//
+//        Boolean result = quizService.scoringMethodForTest(username, infoKey, infoValue, personId, textFromImage);
+//
+//        assertEquals(true, result);
+//    }
+//
+//    @Test
+//    void sendEmailForTest() {
+//        quizService.sendEmailForTest("ataj125@gmail.com");
+//    }
 }
