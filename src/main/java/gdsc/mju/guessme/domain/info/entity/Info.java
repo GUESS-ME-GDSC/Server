@@ -1,10 +1,8 @@
 package gdsc.mju.guessme.domain.info.entity;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import javax.persistence.*;
 
-import gdsc.mju.guessme.domain.quiz.entity.Scoring;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,9 +39,6 @@ public class Info {
     @ManyToOne(optional = false)
     @JoinColumn(name = "person_id")
     private Person person;
-
-    @OneToMany(mappedBy = "info", cascade = CascadeType.ALL)
-    private Set<Scoring> ScoringList;
 
     @Builder
     public Info(String infoKey, String infoValue, Person person) {
