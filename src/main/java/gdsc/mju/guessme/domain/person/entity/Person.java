@@ -2,6 +2,7 @@ package gdsc.mju.guessme.domain.person.entity;
 
 import gdsc.mju.guessme.domain.info.entity.Info;
 import gdsc.mju.guessme.domain.person.dto.UpdatePersonDto;
+import gdsc.mju.guessme.domain.quiz.entity.Scoring;
 import gdsc.mju.guessme.domain.user.entity.User;
 import java.time.LocalDate;
 import java.util.Set;
@@ -53,6 +54,9 @@ public class Person {
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
     private Set<Info> infoList;
+
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+    private Set<Scoring> ScoringList;
 
     @Builder
     public Person(String name, String relation, LocalDate birth, String residence, String image, String voice, Long score, Boolean favorite, User user) {

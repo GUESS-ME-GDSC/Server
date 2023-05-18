@@ -1,5 +1,6 @@
 package gdsc.mju.guessme.domain.quiz.entity;
 
+import gdsc.mju.guessme.domain.info.entity.Info;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import lombok.Builder;
 import lombok.Getter;
