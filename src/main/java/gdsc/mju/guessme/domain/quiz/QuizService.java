@@ -195,7 +195,7 @@ public class QuizService {
         String textFromImage = detectText(imageUrl); // 이미지 추출 텍스트
 
         if (textFromImage == null) {
-            throw new BaseException(403, "Can not read text from image!");
+            throw new BaseException(400, "Can not read text from image!");
         }
 
         // chat gpt를 통해 채점
