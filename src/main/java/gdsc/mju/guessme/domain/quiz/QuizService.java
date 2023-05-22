@@ -191,7 +191,12 @@ public class QuizService {
         String imageUrl = dto.getImage() != null ?
                 gcsService.uploadFile(dto.getImage()) : null;
 
+        // 여기서 텍스트 못읽을 시 에러 발생해야 함.
         String textFromImage = detectText(imageUrl); // 이미지 추출 텍스트
+
+        if (textFromImage == null) {
+            throw new BaseException(400, "Can not read text from image!");
+        }
 
         // chat gpt를 통해 채점
         Boolean correct = scoringWithChatGpt(textFromImage, infoKey, infoValue);
