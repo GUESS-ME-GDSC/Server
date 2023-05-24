@@ -5,10 +5,7 @@ import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import gdsc.mju.guessme.domain.info.repository.InfoRepository;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import gdsc.mju.guessme.domain.person.repository.PersonRepository;
-import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
-import gdsc.mju.guessme.domain.quiz.dto.QuizDto;
-import gdsc.mju.guessme.domain.quiz.dto.QuizResDto;
-import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
+import gdsc.mju.guessme.domain.quiz.dto.*;
 import gdsc.mju.guessme.domain.quiz.entity.Scoring;
 import gdsc.mju.guessme.domain.quiz.repository.ScoringRepository;
 import gdsc.mju.guessme.domain.user.entity.User;
@@ -18,6 +15,7 @@ import gdsc.mju.guessme.global.infra.openai.OpenAIService;
 import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -25,11 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -229,29 +230,14 @@ public class QuizService {
 
                 System.out.println("curFile = " + curFile);
                 // ml server에 요청 ( image compare )
-                RestTemplate restTemplate = new RestTemplate();
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                // 요청 바디 설정
-                MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-                requestBody.add("file1", imageUrl);
-                requestBody.add("file2", curFile);
+                CompareImageResDto response = compareImage(imageUrl, curFile);
 
-                // HttpEntity 생성 (헤더와 바디 설정)
-                HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-
-                // POST 요청 보내기
-                ResponseEntity<String> responseEntity = restTemplate.exchange("http://127.0.0.1:8000/compare_images", HttpMethod.POST, requestEntity, String.class);
-
-                // 응답 결과 가져오기
-                String response = responseEntity.getBody();
-                System.out.println("Response: " + response);
-//                    double similarity = send request to ml server : compareImage(imageUrl, curFile);
-//                    scoring.setSimilarity(similarity);
-//                    if(similarity < 0.9) {
-                // 유사도가 70% 미만이면 보호자에게 보고 메일 전송
+                System.out.println("Response: " + response.getSimilarity());
+                double similarity = response.getSimilarity();
+                if (similarity < 0.7) {
+                    // 유사도가 70% 미만이면 보호자에게 보고 메일 전송
 //                        sendEmail();
-//                    }
+                }
                 // 유사도 검사까지 마무리 후 이미지 삭제
                 gcsService.deleteFile(fileUUID);
             } else {
@@ -282,6 +268,30 @@ public class QuizService {
         gcsService.deleteFile(fileUUID);
 
         return Boolean.FALSE;
+    }
+
+    /**
+     * ml server에 요청
+     */
+    public CompareImageResDto compareImage(String file1_url, String file2_url) {
+        // query parameter 방식 사용
+        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://127.0.0.1:8000/compare_images")
+                .queryParam("file1", file1_url)
+                .queryParam("file2", file2_url)
+                .build(false);
+
+        // Header 제작
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setConnectTimeout(5000); // api 호출 타임아웃
+        factory.setReadTimeout(5000); // api 읽기 타임아웃
+
+        RestTemplate restTemplate = new RestTemplate(factory);
+
+        // 응답
+        return restTemplate.getForObject(uriComponents.toUriString(), CompareImageResDto.class);
     }
 
     /**
