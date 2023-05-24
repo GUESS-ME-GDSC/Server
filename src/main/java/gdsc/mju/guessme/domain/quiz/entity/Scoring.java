@@ -29,10 +29,14 @@ public class Scoring {
     @JoinColumn(name = "person_id")
     private Person person;
 
+    @Column(nullable = false)
+    private String answer;
+
     @Builder
-    public Scoring(String question, Long wrongFlag, Person person) {
+    public Scoring(String question, Long wrongFlag, Person person, String answer) {
         this.question = question;
         this.wrongFlag = wrongFlag;
         this.person = person;
+        this.answer = answer;
     }
 }
