@@ -17,10 +17,14 @@ import gdsc.mju.guessme.global.infra.gcs.GcsService;
 import gdsc.mju.guessme.global.infra.openai.OpenAIService;
 import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
@@ -222,6 +226,26 @@ public class QuizService {
 
                 // 현재 이미지와 이전 이미지 유사도 검사
                 String curFile = scoring.getAnswer();
+
+                System.out.println("curFile = " + curFile);
+                // ml server에 요청 ( image compare )
+                RestTemplate restTemplate = new RestTemplate();
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                // 요청 바디 설정
+                MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+                requestBody.add("file1", imageUrl);
+                requestBody.add("file2", curFile);
+
+                // HttpEntity 생성 (헤더와 바디 설정)
+                HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+                // POST 요청 보내기
+                ResponseEntity<String> responseEntity = restTemplate.exchange("http://127.0.0.1:8000/compare_images", HttpMethod.POST, requestEntity, String.class);
+
+                // 응답 결과 가져오기
+                String response = responseEntity.getBody();
+                System.out.println("Response: " + response);
 //                    double similarity = send request to ml server : compareImage(imageUrl, curFile);
 //                    scoring.setSimilarity(similarity);
 //                    if(similarity < 0.9) {
