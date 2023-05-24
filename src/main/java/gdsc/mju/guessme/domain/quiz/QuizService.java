@@ -118,8 +118,8 @@ public class QuizService {
 
     // 새 점수 등록
     public Long newscore(
-        UserDetails userDetails,
-        NewScoreDto newScoreDto
+            UserDetails userDetails,
+            NewScoreDto newScoreDto
     ) throws BaseException {
         // load user
         User user = userRepository.findByUserId(userDetails.getUsername())
@@ -191,6 +191,11 @@ public class QuizService {
         String imageUrl = dto.getImage() != null ?
                 gcsService.uploadFile(dto.getImage()) : null;
 
+        if (imageUrl == null) {
+            throw new BaseException(400, "Can not upload image!");
+        }
+        String fileUUID = imageUrl.split("/")[4];
+
         // 여기서 텍스트 못읽을 시 에러 발생해야 함.
         String textFromImage = detectText(imageUrl); // 이미지 추출 텍스트
 
@@ -198,55 +203,66 @@ public class QuizService {
             throw new BaseException(400, "Can not read text from image!");
         }
 
-        // chat gpt를 통해 채점
-        Boolean correct = scoringWithChatGpt(textFromImage, infoKey, infoValue);
-        // 채점 후 이미지 삭제
-        if (imageUrl != null) {
-            String fileUUID = imageUrl.split("/")[4];
-            gcsService.deleteFile(fileUUID);
-        }
-
         // personId로 person 찾기
         Person person = personRepository.findById(dto.getPersonId())
                 .orElseThrow(() -> new BaseException(404, "Person not found"));
 
+        // db에서 문제에 대한 채점 정보 가져오기
         Scoring scoring = scoringRepository.findByQuestionAndPerson(infoKey, person);
 
-        if (correct) { // 맞았을 경우
+        // chat gpt를 통해 채점
+        Boolean correct = scoringWithChatGpt(textFromImage, infoKey, infoValue);
+
+        // 맞은 경우
+        if (correct) {
             // 테이블에 있는지 조회
             if (scoring != null) {
                 // 있으면 flag = 0으로 삽입
                 scoring.setWrongFlag(0L);
+
+                // 현재 이미지와 이전 이미지 유사도 검사
+                String curFile = scoring.getAnswer();
+//                    double similarity = send request to ml server : compareImage(imageUrl, curFile);
+//                    scoring.setSimilarity(similarity);
+//                    if(similarity < 0.9) {
+                // 유사도가 70% 미만이면 보호자에게 보고 메일 전송
+//                        sendEmail();
+//                    }
+                // 유사도 검사까지 마무리 후 이미지 삭제
+                gcsService.deleteFile(fileUUID);
             } else {
                 // 없으면 새로 삽입
                 scoringRepository.save(Scoring.builder()
                         .question(infoKey)
                         .wrongFlag(0L)
                         .person(person)
+                        .answer(imageUrl)
                         .build());
             }
-            return Boolean.TRUE;
-        } else { // 틀렸을 경우
-            // 테이블에 있는지 조회
-            if (scoring != null) {
-                // 있으면 flag 증가
-                long flag = scoring.getWrongFlag() + 1;
-                // if flag == 3 -> 행 지우고 메일 보내기
-                if (flag == 3) {
-                    scoringRepository.deleteByQuestionAndPerson(infoKey, person);
-                    // 메일 보내기
-                    sendEmail(user);
-                } else {
-                    scoring.setWrongFlag(flag);
-                }
-            }
 
-            return Boolean.FALSE;
+            return Boolean.TRUE;
+        } else if (scoring != null) { // 테이블에 기존 채점 정보가 있는데 틀렸을 경우
+            // 있으면 flag 증가
+            long flag = scoring.getWrongFlag() + 1;
+            // if flag == 3 -> 행 지우고 메일 보내기
+            if (flag == 3) {
+                scoringRepository.deleteByQuestionAndPerson(infoKey, person);
+                // 메일 보내기
+                sendEmail(user);
+            } else {
+                scoring.setWrongFlag(flag);
+            }
         }
+
+        // 틀린 경우 이미지 삭제
+        gcsService.deleteFile(fileUUID);
+
+        return Boolean.FALSE;
     }
 
     /**
      * 메일 전송
+     *
      * @param user
      */
     private void sendEmail(User user) {
@@ -271,6 +287,7 @@ public class QuizService {
 
     /**
      * chat gpt를 통해 채점
+     *
      * @param textFromImage
      * @param question
      * @param answer
