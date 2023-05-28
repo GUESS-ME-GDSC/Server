@@ -232,10 +232,10 @@ public class QuizService {
                 // ml server에 요청 ( image compare )
                 CompareImageResDto response = compareImage(imageUrl, curFile);
 
-                System.out.println("Response: " + response.getSimilarity());
-                double similarity = response.getSimilarity();
-                if (similarity < 0.7) {
-                    // 유사도가 70% 미만이면 보호자에게 보고 메일 전송
+                System.out.println("Response: " + response.getDissimilarity());
+                double dissimilarity = response.getDissimilarity();
+                if (dissimilarity > 2.00) {
+                    // Dissimilarity가 2.0 이상이면 보호자에게 보고 메일 전송
 //                        sendEmail();
                 }
                 // 유사도 검사까지 마무리 후 이미지 삭제
@@ -275,7 +275,7 @@ public class QuizService {
      */
     public CompareImageResDto compareImage(String file1_url, String file2_url) {
         // query parameter 방식 사용
-        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://127.0.0.1:8000/compare_images")
+        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://[ml_server_url]/compare_images")
                 .queryParam("file1", file1_url)
                 .queryParam("file2", file2_url)
                 .build(false);

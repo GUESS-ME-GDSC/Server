@@ -7,10 +7,10 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 public class CompareImageResDto {
-    private Double similarity;
+    private Double dissimilarity;
 
     @Builder
-    public CompareImageResDto(Double similarity) {
-        this.similarity = similarity;
+    public CompareImageResDto(Double dissimilarity) {
+        this.dissimilarity = dissimilarity;
     }
 }
