@@ -5,10 +5,7 @@ import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import gdsc.mju.guessme.domain.info.repository.InfoRepository;
 import gdsc.mju.guessme.domain.person.entity.Person;
 import gdsc.mju.guessme.domain.person.repository.PersonRepository;
-import gdsc.mju.guessme.domain.quiz.dto.NewScoreDto;
-import gdsc.mju.guessme.domain.quiz.dto.QuizDto;
-import gdsc.mju.guessme.domain.quiz.dto.QuizResDto;
-import gdsc.mju.guessme.domain.quiz.dto.ScoreReqDto;
+import gdsc.mju.guessme.domain.quiz.dto.*;
 import gdsc.mju.guessme.domain.quiz.entity.Scoring;
 import gdsc.mju.guessme.domain.quiz.repository.ScoringRepository;
 import gdsc.mju.guessme.domain.user.entity.User;
@@ -17,15 +14,23 @@ import gdsc.mju.guessme.global.infra.gcs.GcsService;
 import gdsc.mju.guessme.global.infra.openai.OpenAIService;
 import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -118,8 +123,8 @@ public class QuizService {
 
     // 새 점수 등록
     public Long newscore(
-        UserDetails userDetails,
-        NewScoreDto newScoreDto
+            UserDetails userDetails,
+            NewScoreDto newScoreDto
     ) throws BaseException {
         // load user
         User user = userRepository.findByUserId(userDetails.getUsername())
@@ -191,6 +196,11 @@ public class QuizService {
         String imageUrl = dto.getImage() != null ?
                 gcsService.uploadFile(dto.getImage()) : null;
 
+        if (imageUrl == null) {
+            throw new BaseException(400, "Can not upload image!");
+        }
+        String fileUUID = imageUrl.split("/")[4];
+
         // 여기서 텍스트 못읽을 시 에러 발생해야 함.
         String textFromImage = detectText(imageUrl); // 이미지 추출 텍스트
 
@@ -198,55 +208,95 @@ public class QuizService {
             throw new BaseException(400, "Can not read text from image!");
         }
 
-        // chat gpt를 통해 채점
-        Boolean correct = scoringWithChatGpt(textFromImage, infoKey, infoValue);
-        // 채점 후 이미지 삭제
-        if (imageUrl != null) {
-            String fileUUID = imageUrl.split("/")[4];
-            gcsService.deleteFile(fileUUID);
-        }
-
         // personId로 person 찾기
         Person person = personRepository.findById(dto.getPersonId())
                 .orElseThrow(() -> new BaseException(404, "Person not found"));
 
+        // db에서 문제에 대한 채점 정보 가져오기
         Scoring scoring = scoringRepository.findByQuestionAndPerson(infoKey, person);
 
-        if (correct) { // 맞았을 경우
+        // chat gpt를 통해 채점
+        Boolean correct = scoringWithChatGpt(textFromImage, infoKey, infoValue);
+
+        // 맞은 경우
+        if (correct) {
             // 테이블에 있는지 조회
             if (scoring != null) {
                 // 있으면 flag = 0으로 삽입
                 scoring.setWrongFlag(0L);
+
+                // 현재 이미지와 이전 이미지 유사도 검사
+                String curFile = scoring.getAnswer();
+
+                System.out.println("curFile = " + curFile);
+                // ml server에 요청 ( image compare )
+                CompareImageResDto response = compareImage(imageUrl, curFile);
+
+                System.out.println("Response: " + response.getDissimilarity());
+                double dissimilarity = response.getDissimilarity();
+                if (dissimilarity > 2.00) {
+                    // Dissimilarity가 2.0 이상이면 보호자에게 보고 메일 전송
+//                        sendEmail();
+                }
+                // 유사도 검사까지 마무리 후 이미지 삭제
+                gcsService.deleteFile(fileUUID);
             } else {
                 // 없으면 새로 삽입
                 scoringRepository.save(Scoring.builder()
                         .question(infoKey)
                         .wrongFlag(0L)
                         .person(person)
+                        .answer(imageUrl)
                         .build());
             }
-            return Boolean.TRUE;
-        } else { // 틀렸을 경우
-            // 테이블에 있는지 조회
-            if (scoring != null) {
-                // 있으면 flag 증가
-                long flag = scoring.getWrongFlag() + 1;
-                // if flag == 3 -> 행 지우고 메일 보내기
-                if (flag == 3) {
-                    scoringRepository.deleteByQuestionAndPerson(infoKey, person);
-                    // 메일 보내기
-                    sendEmail(user);
-                } else {
-                    scoring.setWrongFlag(flag);
-                }
-            }
 
-            return Boolean.FALSE;
+            return Boolean.TRUE;
+        } else if (scoring != null) { // 테이블에 기존 채점 정보가 있는데 틀렸을 경우
+            // 있으면 flag 증가
+            long flag = scoring.getWrongFlag() + 1;
+            // if flag == 3 -> 행 지우고 메일 보내기
+            if (flag == 3) {
+                scoringRepository.deleteByQuestionAndPerson(infoKey, person);
+                // 메일 보내기
+                sendEmail(user);
+            } else {
+                scoring.setWrongFlag(flag);
+            }
         }
+
+        // 틀린 경우 이미지 삭제
+        gcsService.deleteFile(fileUUID);
+
+        return Boolean.FALSE;
+    }
+
+    /**
+     * ml server에 요청
+     */
+    public CompareImageResDto compareImage(String file1_url, String file2_url) {
+        // query parameter 방식 사용
+        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://[ml_server_url]/compare_images")
+                .queryParam("file1", file1_url)
+                .queryParam("file2", file2_url)
+                .build(false);
+
+        // Header 제작
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setConnectTimeout(5000); // api 호출 타임아웃
+        factory.setReadTimeout(5000); // api 읽기 타임아웃
+
+        RestTemplate restTemplate = new RestTemplate(factory);
+
+        // 응답
+        return restTemplate.getForObject(uriComponents.toUriString(), CompareImageResDto.class);
     }
 
     /**
      * 메일 전송
+     *
      * @param user
      */
     private void sendEmail(User user) {
@@ -271,6 +321,7 @@ public class QuizService {
 
     /**
      * chat gpt를 통해 채점
+     *
      * @param textFromImage
      * @param question
      * @param answer
