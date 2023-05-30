@@ -20,8 +20,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -31,6 +29,8 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -234,12 +234,25 @@ public class QuizService {
 
                 System.out.println("Response: " + response.getDissimilarity());
                 double dissimilarity = response.getDissimilarity();
+                // 맞았는데 글씨체 많이 변한 경우
                 if (dissimilarity > 2.00) {
                     // Dissimilarity가 2.0 이상이면 보호자에게 보고 메일 전송
-//                        sendEmail();
+
+                    // 처음 작성 시간
+                    LocalDateTime then = scoring.getCorrectAt();
+                    // 포맷팅
+                    String firstImageTime = then.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toString();
+
+                    // 현재 시간
+                    LocalDateTime now = LocalDateTime.now();
+                    // 포맷팅
+                    String lastImageTime = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toString();
+
+                    sendEmailWhenDissimilarity(user, curFile, imageUrl, firstImageTime, lastImageTime);
+                    System.out.println("원래 이미지 : " + curFile + ", 지금 이미지 : " + imageUrl);
                 }
-                // 유사도 검사까지 마무리 후 이미지 삭제
-                gcsService.deleteFile(fileUUID);
+                // 유사도 검사까지 마무리 후 이미지 삭제 -> 삭제 하면 안됨!
+                // gcsService.deleteFile(fileUUID);
             } else {
                 // 없으면 새로 삽입
                 scoringRepository.save(Scoring.builder()
@@ -311,6 +324,34 @@ public class QuizService {
                 // 3. 메일 내용 설정
                 Context context = new Context();
                 message.setText(templateEngine.process("mail", context), "utf-8", "html");
+
+                javaMailSender.send(message);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to send email", e);
+            }
+        });
+    }
+
+    // 유사도 많이 떨어질 시 전송 메일
+    private void sendEmailWhenDissimilarity(User user, String firstImage, String lastImage, String firstImageTime, String lastImageTime) {
+        executorService.submit(() -> {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            try {
+                // 1. 메일 제목 설정
+                message.setSubject("Guess me! : check on your loved one!");
+                // 2. 메일 수신자 설정
+                message.addRecipients(MimeMessage.RecipientType.TO, user.getEmail());
+
+                // 3. 메일 내용 설정
+                Context context = new Context();
+                // 기존 이미지
+                context.setVariable("firstImage", firstImage);
+                context.setVariable("firstImageTime", firstImageTime);
+
+                // 새로 작성한 이미지
+                context.setVariable("lastImage", lastImage);
+                context.setVariable("lastImageTime", lastImageTime);
+                message.setText(templateEngine.process("mailForHandwritingDissimilarity", context), "utf-8", "html");
 
                 javaMailSender.send(message);
             } catch (Exception e) {
