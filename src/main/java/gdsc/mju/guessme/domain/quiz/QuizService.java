@@ -14,6 +14,7 @@ import gdsc.mju.guessme.global.infra.gcs.GcsService;
 import gdsc.mju.guessme.global.infra.openai.OpenAIService;
 import gdsc.mju.guessme.global.response.BaseException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -47,6 +48,9 @@ public class QuizService {
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
     private final ScoringRepository scoringRepository;
+
+    @Value("${ml_server.url}")
+    private String ML_SERVER_URL;
 
     public QuizResDto createQuiz(String username, long personId) {
 
@@ -288,7 +292,7 @@ public class QuizService {
      */
     public CompareImageResDto compareImage(String file1_url, String file2_url) {
         // query parameter 방식 사용
-        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://[ml_server_url]/compare_images")
+        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(ML_SERVER_URL)
                 .queryParam("file1", file1_url)
                 .queryParam("file2", file2_url)
                 .build(false);
