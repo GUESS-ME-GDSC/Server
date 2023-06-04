@@ -1,6 +1,7 @@
 package gdsc.mju.guessme.domain.user.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,12 +10,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import gdsc.mju.guessme.domain.person.entity.Person;
 
 @Getter
 @Entity
@@ -34,9 +37,16 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String userPassword;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Person> personList;
+
+    @Email
+    @Column(nullable = false)
+    private String email;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
-    private List<String> roles = new ArrayList<>();
+    private Set<String> roles = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

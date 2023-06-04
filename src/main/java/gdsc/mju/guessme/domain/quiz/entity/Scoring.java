@@ -1,8 +1,6 @@
-package gdsc.mju.guessme.domain.info.entity;
+package gdsc.mju.guessme.domain.quiz.entity;
 
-import java.time.LocalDateTime;
-import javax.persistence.*;
-
+import gdsc.mju.guessme.domain.person.entity.Person;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,14 +9,14 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import gdsc.mju.guessme.domain.person.entity.Person;
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Getter @Setter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @Entity
-public class Info {
+public class Scoring {
 
     @Id
     @Column(name = "id")
@@ -28,22 +26,26 @@ public class Info {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime correctAt;
 
     @Column(nullable = false)
-    private String infoKey;
+    private String question;
 
     @Column(nullable = false)
-    private String infoValue;
+    private Long wrongFlag;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "person_id")
     private Person person;
 
+    @Column(nullable = false)
+    private String answer;
+
     @Builder
-    public Info(String infoKey, String infoValue, Person person) {
-        this.infoKey = infoKey;
-        this.infoValue = infoValue;
+    public Scoring(String question, Long wrongFlag, Person person, String answer) {
+        this.question = question;
+        this.wrongFlag = wrongFlag;
         this.person = person;
+        this.answer = answer;
     }
 }

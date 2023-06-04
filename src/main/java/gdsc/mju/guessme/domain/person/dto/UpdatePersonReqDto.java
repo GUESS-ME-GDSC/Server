@@ -3,13 +3,12 @@ package gdsc.mju.guessme.domain.person.dto;
 import gdsc.mju.guessme.domain.info.dto.InfoObj;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
-@Getter
+@Getter @Setter
 @ToString
 public class UpdatePersonReqDto {
 
@@ -23,7 +22,15 @@ public class UpdatePersonReqDto {
     private List<InfoObj> info;
 
     @Builder
-    public UpdatePersonReqDto(MultipartFile image, MultipartFile voice, String name, String relation, LocalDate birth, String residence, List<InfoObj> info) {
+    public UpdatePersonReqDto(
+            MultipartFile image,
+            MultipartFile voice,
+            String name,
+            String relation,
+            LocalDate birth,
+            String residence,
+            List<InfoObj> info
+    ) {
         this.image = image;
         this.voice = voice;
         this.name = name;

@@ -4,8 +4,11 @@ import gdsc.mju.guessme.domain.info.entity.Info;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
+@Getter @Setter
+@NoArgsConstructor
 public class InfoObj {
     private Long id;
     private String infoKey;
