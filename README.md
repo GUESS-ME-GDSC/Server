@@ -3,10 +3,10 @@
 <p align="center">
  <br>
  <div width="400" style="background: none;" align="center">
-  <img src='https://user-images.githubusercontent.com/65845941/229036268-f624d0cb-aa3a-425e-986f-04c79246fed2.png' alt="Guess me Logo" width="400" />
+  <img src='https://user-images.githubusercontent.com/86697585/243171405-2ac24af5-a4c3-422c-8712-b25e29eadd31.png' alt="Guess me Logo" width="700" />
  </div>
 </p>
-<p align="center"><a href="https://www.youtube.com/watch?v=ugiZ4gcbAow">Demo Video</a>
+<p align="center"><a href="https://www.youtube.com/watch?v=FTT72MwJD6c">Demo Video</a>
 </p>
 <p align="center">
  <img alt="GitHub language count" src="https://img.shields.io/github/contributors/GUESS-ME-GDSC/Server?style=for-the-badge&logo">
@@ -65,7 +65,7 @@ There is **Two key features** exist.
  
 <h2 id="stacks"> 🛠️  Tech Stacks </h2>
 
-<img width="500" alt="Guessme_project_architecture" src="https://user-images.githubusercontent.com/65845941/229068477-4913d2c9-79f0-4f10-83e9-a0b599ddf0b0.png">
+<img width="500" alt="Guessme_project_architecture" src="https://user-images.githubusercontent.com/86697585/243169504-cadfd2dc-7afd-4757-bace-34e4d96f650c.png">
 
 ### 🚉 Platform
 
@@ -82,6 +82,13 @@ There is **Two key features** exist.
 - [JPA](https://spring.io/projects/spring-data-jpa)
 - [Spring Security](https://spring.io/projects/spring-security)
 - [JWT](https://jwt.io/)
+
+### 😄 ML(Image Compare Server)
+
+- [python 3.9.6](https://www.python.org/downloads/release/python-396/)
+- tensorflow
+- keras
+- torch
 
 ### 😎 Android
 
@@ -114,6 +121,16 @@ The only thing you need is a [Android Client](https://github.com/GUESS-ME-GDSC/A
 
 ```
 Server/
+├─ .gitignore
+├─ .gitmessage.txt
+├─ Dockerfile
+├─ HELP.md
+├─ README.md
+├─ gradle
+│  └─ wrapper
+│     └─ gradle-wrapper.properties
+├─ gradlew
+├─ gradlew.bat
 └─ src
    ├─ main
    │  ├─ java
@@ -158,11 +175,16 @@ Server/
    │  │           │  ├─ quiz
    │  │           │  │  ├─ QuizController.java
    │  │           │  │  ├─ QuizService.java
-   │  │           │  │  └─ dto
-   │  │           │  │     ├─ NewScoreDto.java
-   │  │           │  │     ├─ QuizDto.java
-   │  │           │  │     ├─ QuizResDto.java
-   │  │           │  │     └─ ScoreReqDto.java
+   │  │           │  │  ├─ dto
+   │  │           │  │  │  ├─ CompareImageResDto.java
+   │  │           │  │  │  ├─ NewScoreDto.java
+   │  │           │  │  │  ├─ QuizDto.java
+   │  │           │  │  │  ├─ QuizResDto.java
+   │  │           │  │  │  └─ ScoreReqDto.java
+   │  │           │  │  ├─ entity
+   │  │           │  │  │  └─ Scoring.java
+   │  │           │  │  └─ repository
+   │  │           │  │     └─ ScoringRepository.java
    │  │           │  └─ user
    │  │           │     ├─ UserController.java
    │  │           │     ├─ UserService.java
@@ -178,9 +200,19 @@ Server/
    │  │              │  ├─ JwtSecurityConfig.java
    │  │              │  └─ SecurityConfig.java
    │  │              ├─ infra
-   │  │              │  └─ gcs
-   │  │              │     ├─ GCSConfig.java
-   │  │              │     └─ GcsService.java
+   │  │              │  ├─ gcs
+   │  │              │  │  ├─ GCSConfig.java
+   │  │              │  │  └─ GcsService.java
+   │  │              │  └─ openai
+   │  │              │     ├─ OpenAIRestTemplateConfig.java
+   │  │              │     ├─ OpenAIService.java
+   │  │              │     ├─ OpenAIServiceImpl.java
+   │  │              │     └─ dto
+   │  │              │        ├─ ChatRequest.java
+   │  │              │        ├─ ChatResponse.java
+   │  │              │        ├─ Choice.java
+   │  │              │        ├─ Message.java
+   │  │              │        └─ Usage.java
    │  │              └─ response
    │  │                 ├─ BaseException.java
    │  │                 ├─ BaseResponse.java
@@ -188,17 +220,24 @@ Server/
    │  │                 └─ UserNotFoundException.java
    │  └─ resources
    │     ├─ application.properties
-   │     ├─ static
    │     └─ templates
+   │        ├─ mail.html
+   │        └─ mailForHandwritingDissimilarity.html
    └─ test
       └─ java
          └─ gdsc
             └─ mju
                └─ guessme
                   ├─ GuessmeApplicationTests.java
-                  └─ domain
-                     └─ auth
-                        └─ AuthServiceTest.java
+                  ├─ domain
+                  │  ├─ auth
+                  │  │  └─ AuthServiceTest.java
+                  │  └─ quiz
+                  │     └─ QuizServiceTest.java
+                  └─ global
+                     └─ infra
+                        └─ openai
+                           └─ OpenAIServiceImplTest.java
 
 ```
 
